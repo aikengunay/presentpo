@@ -1,30 +1,40 @@
 #!/usr/bin/env bash
-# M7 HTTP smoke against a running server (default http://127.0.0.1:3000)
+# Smoke against a running server (default http://127.0.0.1:3000).
+# For HTTPS: SMOKE_BASE=https://127.0.0.1:3000 npm run smoke:http
 set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BASE="${SMOKE_BASE:-http://127.0.0.1:3000}"
 PIN="${TEACHER_PIN:-1234}"
+TLS_OPTS=()
+if [[ "$BASE" == https://* ]]; then
+  if [[ -f "$ROOT/certs/rootCA.pem" ]]; then
+    TLS_OPTS=(--cacert "$ROOT/certs/rootCA.pem")
+  else
+    TLS_OPTS=(-k)
+  fi
+fi
 COOKIE_JAR="$(mktemp)"
 cleanup() { rm -f "$COOKIE_JAR"; }
 trap cleanup EXIT
 
 echo "== health / =="
-curl -fsS "$BASE/" >/dev/null
+curl -fsS "${TLS_OPTS[@]}" "$BASE/" >/dev/null
 
 echo "== teacher login =="
-curl -fsS -c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+curl -fsS "${TLS_OPTS[@]}" -c "$COOKIE_JAR" -b "$COOKIE_JAR" \
   -H 'Content-Type: application/json' \
   -d "{\"pin\":\"$PIN\"}" \
   "$BASE/api/teacher/login" | grep -q '"ok":true'
 
 echo "== sections list =="
-curl -fsS -b "$COOKIE_JAR" "$BASE/api/sections" | grep -q 'sections'
+curl -fsS "${TLS_OPTS[@]}" -b "$COOKIE_JAR" "$BASE/api/sections" | grep -q 'sections'
 
 echo "== teacher UI =="
-code=$(curl -s -o /dev/null -w '%{http_code}' -b "$COOKIE_JAR" "$BASE/teacher")
+code=$(curl -s "${TLS_OPTS[@]}" -o /dev/null -w '%{http_code}' -b "$COOKIE_JAR" "$BASE/teacher")
 test "$code" = "200"
 
 echo "== join UI =="
-code=$(curl -s -o /dev/null -w '%{http_code}' "$BASE/join")
+code=$(curl -s "${TLS_OPTS[@]}" -o /dev/null -w '%{http_code}' "$BASE/join")
 test "$code" = "200"
 
-echo "HTTP smoke OK against $BASE"
+echo "Smoke OK against $BASE"

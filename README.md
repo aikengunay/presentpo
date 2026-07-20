@@ -15,16 +15,18 @@ cp .env.example .env   # set TEACHER_PIN
 mkdir -p data
 npm install
 npx prisma migrate dev
+brew install mkcert nss   # once per laptop
+npm run certs:setup       # after joining classroom AP (covers LAN IPs)
 npm run dev
 ```
 
-`npm run dev` prints your LAN URL + a terminal QR (same idea as taranood) so phones on the same Wi‑Fi/AP can open `http://<PC-IP>:3000`. Use that URL on the phone — not `localhost`.
+`npm run dev` prints your **HTTPS** LAN URL + a terminal QR when `certs/` exist (mkcert). Phones on the same Wi‑Fi/AP open `https://<PC-IP>:3000` — not `localhost`. Install `certs/rootCA.pem` on phones once so the certificate is trusted (required for in-app camera). Details: [classroom runbook](.cursor/references/10-classroom-runbook.md).
 
-**Next.js 16 note:** phone access needs `allowedDevOrigins` (auto-filled from your LAN IPs in `next.config.ts`). Restart `npm run dev` after network/IP changes.
+**Next.js 16 note:** phone access needs `allowedDevOrigins` (auto-filled from your LAN IPs in `next.config.ts`). Restart `npm run dev` after network/IP changes. Re-run `npm run certs:setup` when the laptop IP changes.
 
-- App: `http://localhost:3000` on this PC (bound to `0.0.0.0`)
+- App: `https://localhost:3000` on this PC (bound to `0.0.0.0`); HTTP fallback: `npm run dev:http`
 - Teacher: `/teacher` → PIN → import classlist → start session → projector
-- Student: open `/join` → **Open camera** (in-app) or phone Camera on projector QR → Student ID → confirm (typed fallback code still works; in-app camera often blocked on HTTP LAN — see classroom runbook)
+- Student: open `/join` → **Open camera** (in-app on trusted HTTPS) or phone Camera on projector QR → Student ID → confirm
 - Export: section → **Export gradebook** → filled `midterms`/`finals`/`all`/`summary` workbook
 
 ### Demo section (not a real class)
@@ -47,7 +49,8 @@ Do not treat INF191 exports as term gradebooks (template fallback only).
 ```bash
 npm test                 # includes INF231/INF232 dry-run
 npm run build
-npm run start            # then: npm run smoke:http
+npm run start            # HTTPS (needs certs); HTTP: npm run start:http
+SMOKE_BASE=https://127.0.0.1:3000 npm run smoke:http   # uses -k if https
 ```
 
 Dry-run notes: [`.cursor/references/16-mvp-dryrun-notes.md`](.cursor/references/16-mvp-dryrun-notes.md).
@@ -60,16 +63,17 @@ mkdir -p data
 docker compose up --build
 ```
 
-Phones on the teacher AP: `http://<laptop-lan-ip>:3000`  
+Docker Compose still serves **HTTP** on `:3000` (good for OS Camera / typed fallback). For in-app camera, prefer host HTTPS: `npm run certs:setup && npm run build && npm run start`.
+
 SQLite persists in `./data`.
 
 ### Classroom AP checklist
 
 1. Power AP → SSID e.g. `CTADWEBL-ATTEND` (write password on board).
 2. Connect laptop to AP; note LAN IP (`ipconfig getifaddr en0` on macOS).
-3. `docker compose up --build` (or `npm run start` after build).
-4. Laptop + a phone on same SSID must open `http://<IP>:3000`.
-5. If phones fail: disable AP / guest isolation.
+3. `npm run certs:setup` then `npm run build && npm run start` (or Docker HTTP if you skip in-app camera).
+4. Install `certs/rootCA.pem` on phones once; open `https://<IP>:3000`.
+5. If phones fail: disable AP / guest isolation; confirm CA trust on iOS.
 6. Teacher: login → section → **Start session** → **Projector QR** (fullscreen).
 7. Optional: enable **Announce names** (TTS, off by default).
 8. **End session** → missing → `0` → **Export gradebook** when convenient.

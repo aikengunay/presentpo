@@ -42,6 +42,10 @@ lib/generated/
 .DS_Store
 *.pem
 
+# mkcert classroom TLS (keep README)
+/certs/*
+!/certs/README.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*

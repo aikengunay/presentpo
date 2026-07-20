@@ -124,7 +124,7 @@ export function JoinQrScanner({
           typeof window !== "undefined" && !window.isSecureContext;
         if (insecure) {
           setMessage(
-            "In-app camera needs a secure context (HTTPS or localhost). On classroom HTTP LAN, use your phone’s Camera app on the projector QR, or type the fallback code.",
+            "In-app camera needs HTTPS. Teacher: npm run certs:setup and share certs/rootCA.pem for phones. Or use the phone Camera app / typed fallback code.",
           );
         } else if (errName === "NotAllowedError") {
           setMessage(
