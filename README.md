@@ -6,7 +6,7 @@ Built for CTADWEBL sections (INF231 / INF232) and designed to export into the ex
 
 ## Status
 
-**M2 scaffold** — Next.js + Prisma + SQLite + Docker Compose. Product features (import, session, check-in) follow in later milestones.
+**M3** — Teacher PIN, classlist import, sections + roster. Session/QR check-in is next.
 
 ## Quick start (local)
 
