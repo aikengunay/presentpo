@@ -1,0 +1,12 @@
+---
+description: Git commit identity and trailer rules
+alwaysApply: true
+---
+
+# Git commits — identity
+
+- Commit with the **user’s** configured git author only (`user.name` / `user.email`).
+- **Never** add `Co-Authored-By`, `Signed-off-by` for an AI, or any trailer that attributes the commit to Cursor, Copilot, ChatGPT, Claude, or another AI tool.
+- **Never** amend commit messages to insert AI co-author metadata.
+- Do not change `git config` (global or local) unless the user explicitly asks.
+- Prefer short conventional messages focused on why (e.g. `docs: …`, `feat: …`, `chore: …`).

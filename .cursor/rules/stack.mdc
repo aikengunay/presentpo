@@ -1,0 +1,27 @@
+---
+description: Stack and file conventions for attendance-tracker
+globs: app/**/*.{ts,tsx},lib/**/*.{ts,tsx},prisma/**/*,components/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Stack conventions
+
+- **Next.js App Router** + TypeScript
+- **Prisma** + **SQLite** (`DATABASE_URL=file:./data/dev.db`)
+- **Docker Compose** is the preferred classroom run path (bind `0.0.0.0`, SQLite volume)
+- Put domain logic in `lib/` (scoring, import, qr, export) — not in React components
+- API routes under `app/api/`; teacher UI vs student UI clearly separated
+- No Postgres/Supabase/NextAuth until after 2-day test unless user asks
+- Env: `TEACHER_PIN`, `QR_ROTATE_SECONDS`, `EARLY_CHECKIN_MINUTES`, `TZ`
+
+## Scoring
+
+```ts
+// lib/scoring.ts — keep pure
+// 1: <15m late (incl on-time)
+// 2: 15–30m, 3: 30–60m, 4: 60m+
+```
+
+## Import
+
+Registrar `.xls` is TSV text. Parse schedules + students; upsert by Student ID.
