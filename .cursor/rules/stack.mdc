@@ -7,14 +7,14 @@ alwaysApply: false
 # Stack conventions
 
 - **Next.js App Router** + TypeScript
-- **Prisma 7** + **SQLite** via `@prisma/adapter-better-sqlite3` (`DATABASE_URL=file:./data/dev.db`)
+- **Prisma 7** — local dev may use SQLite (`better-sqlite3`); **production v0.2 uses a cloud DB** (lock in deploy P1)
 - Generated client: `lib/generated/prisma` (gitignored; `prisma generate` / postinstall)
 - Singleton client: `lib/db.ts`
-- **Docker Compose** is the preferred classroom run path (bind `0.0.0.0`, SQLite volume `./data`)
-- Put domain logic in `lib/` (scoring, import, qr, export) — not in React components
-- API routes under `app/api/`; teacher UI vs student UI clearly separated
-- No Postgres/Supabase/NextAuth until after 2-day test unless user asks
-- Env: `TEACHER_PIN`, `QR_ROTATE_SECONDS`, `EARLY_CHECKIN_MINUTES`, `TZ`
+- **Production:** public HTTPS via domain + Cloudflare; not classroom AP / `0.0.0.0` LAN as the product path
+- Domain logic in `lib/` (scoring, import, tokens, export) — not in React components
+- API under `app/api/`; teacher Station Scan is auth-only finalize
+- Env: `TEACHER_PIN`, `EARLY_CHECKIN_MINUTES`, `TZ`, plus cloud `DATABASE_URL` / `PUBLIC_APP_URL` as added in P1
+- QR decode library belongs on **teacher Scan**, not student `/join`
 
 ## Scoring
 

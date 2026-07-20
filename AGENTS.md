@@ -3,12 +3,15 @@
 Before coding product behavior, read:
 
 1. `.cursor/references/01-product-brief.md`
-2. `.cursor/references/07-phases-2day.md`
-3. `.cursor/references/13-screen-flow.md`
-4. `.cursor/references/14-data-model.md`
-5. `.cursor/references/15-api-mvp.md`
-6. `.cursor/rules/project.mdc`
-7. `.cursor/rules/git-commits.mdc`
+2. `.cursor/references/04-session-lifecycle.md`
+3. `.cursor/references/10-classroom-runbook.md`
+4. `.cursor/references/11-anti-cheat-and-identity.md`
+5. `.cursor/references/13-screen-flow.md`
+6. `.cursor/references/15-api-mvp.md`
+7. `.cursor/references/18-v0.2-remove-overhaul.md`
+8. `.cursor/plans/attendance_tracker_v0.2_complete.plan.md`
+9. `.cursor/rules/project.mdc`
+10. `.cursor/rules/git-commits.mdc`
 
 ## Cursor rules
 
@@ -16,29 +19,24 @@ Before coding product behavior, read:
 |------|------|
 | `.cursor/rules/project.mdc` | Always — product locks + reference map |
 | `.cursor/rules/stack.mdc` | When editing `app/`, `lib/`, `prisma/`, `components/` |
-| `.cursor/rules/git-commits.mdc` | Always — no AI co-author trailers |
+| `.cursor/rules/git-commits.mdc` | Always — conventional commits when asked; **never push unless user asks**; no AI co-author trailers |
 
-## Git commits
+## Git
 
-- Use the user’s git identity only.
-- **Never** add `Co-Authored-By` or any AI co-author / tool attribution trailer.
+- Commit **only** when the user asks; use Conventional Commits (`feat:`, `fix:`, `docs:`, …).
+- **Never push** unless the user explicitly asks (they want to test locally first).
+- **Never** add `Co-Authored-By` or AI attribution trailers.
 
-## Mission
+## Mission (v0.2)
 
-Ship a **2-day testable** attendance web app:
-
-- Import university classlists
-- Teacher starts session → rotating classroom QR
-- Students self check-in → codes `1–4` / auto `0`
-- Export for existing Excel attendance sheets
+- Public HTTPS app (Cloudflare + domain); internet required
+- Teacher **tripod Station Scan** of student personal QR
+- Codes `1–4` / auto `0`; Excel export
+- Delete retired AP / projector-self-scan paths per `18-v0.2-remove-overhaul.md`
 
 ## Do not
 
-- Build teacher-scan-every-student as the primary flow
-- Treat blank (no session) as absent `0`
-- Add biometrics, multi-tenant SaaS, or heavy infra before Day 2 exit criteria
-- Add student password accounts in MVP (see `11-anti-cheat-and-identity.md`)
-
-## Stack
-
-Next.js (App Router) + TypeScript + Prisma + SQLite — see `.cursor/references/06-stack.md`.
+- Rebuild classroom AP / offline LAN / mkcert-for-class as the product path
+- Rebuild student→projector rotating QR as primary check-in
+- Add biometrics, geofence, student passwords, or multi-tenant SaaS in v0.2
+- Push to remote after each milestone without being asked

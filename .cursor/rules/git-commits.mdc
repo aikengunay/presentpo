@@ -1,12 +1,28 @@
 ---
-description: Git commit identity and trailer rules
+description: Git commits, push discipline, and no AI trailers
 alwaysApply: true
 ---
 
-# Git commits — identity
+# Git — commits and push
 
-- Commit with the **user’s** configured git author only (`user.name` / `user.email`).
-- **Never** add `Co-Authored-By`, `Signed-off-by` for an AI, or any trailer that attributes the commit to Cursor, Copilot, ChatGPT, Claude, or another AI tool.
-- **Never** amend commit messages to insert AI co-author metadata.
-- Do not change `git config` (global or local) unless the user explicitly asks.
-- Prefer short conventional messages focused on why (e.g. `docs: …`, `feat: …`, `chore: …`).
+## Push (always)
+
+- **Never** `git push` (or publish tags to remote) unless the user **explicitly** asks in that message.
+- Completing a plan milestone is **not** permission to push. Leave commits local so the user can test first.
+- Do not assume “ship after each P*” cadence means push — that cadence is paused unless the user says otherwise.
+
+## Commits
+
+- **Only commit when the user explicitly asks** to commit (same as the user’s global git rule).
+- When committing, use **Conventional Commits**:
+  - `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`, `perf:`
+  - Short subject; optional body for why
+  - Examples: `docs: pivot product refs to cloud tripod check-in`, `feat: teacher station scan`
+- Prefer one logical change per commit when the user asks to split; otherwise follow their request.
+
+## Identity / trailers
+
+- Commit with the **user’s** configured git author only.
+- **Never** add `Co-Authored-By`, AI `Signed-off-by`, or any trailer attributing the commit to Cursor or another AI tool.
+- If the environment injects a co-author trailer, rewrite the commit with `git commit-tree` (no amend of pushed history) **only when the user asked for a commit** and before any push they requested.
+- Do not change `git config` unless the user explicitly asks.

@@ -2,59 +2,59 @@
 
 ## Do we create accounts with passwords?
 
-**MVP recommendation: No full student password accounts.**
+**Recommendation: No full student password accounts** (unchanged).
 
-| Approach | Cheat resistance | Teacher/student friction | Verdict |
-|----------|------------------|--------------------------|---------|
-| Student password accounts | Medium (shared passwords still happen) | High (reset hell, first-week chaos) | Later |
+| Approach | Cheat resistance | Friction | Verdict |
+|----------|------------------|----------|---------|
+| Student password accounts | Medium | High | Later |
 | Student ID + name confirm only | Low alone | Low | Not enough alone |
-| **ID + roster bind + rotating QR + one check-in** | Good enough for class | Low | **MVP** |
-| School Google / Microsoft login | Higher | Medium (IT dependent) | Phase 3 |
-| Teacher scan / visual confirm | Highest | High (interrupts teaching) | Fallback only |
+| **ID + confirm + personal QR + teacher station scan** | Strong for class | Medium (station line) | **v0.2** |
+| School Google / Microsoft login | Higher | Medium (IT) | Later |
+| Projector self-scan only | Medium | Low | **Retired** |
 
-### MVP identity
+### Identity (v0.2)
 
 1. Student enters **Student ID** (from classlist).
 2. App shows matched **name** → student confirms “This is me”.
-3. Optional light gate: last 4 of ID, or birth year — **only if** import has it (usually not). Prefer skip.
-4. Check-in only succeeds with a **valid current QR token** for an **open** session of **their section**.
-5. **One attendance row per student per session** (second scan rejected).
+3. App shows a **personal QR** (session + student bound, short TTL).
+4. Teacher **Station Scan** (PIN session) decodes QR → shows name/ID → confirm → attendance with `source = teacher_scan`.
+5. **One attendance row per student per session**.
 
-Passwords for ~60–80 students across sections create support load that will sink a 2-day test. Proxy (“give friend your ID”) remains possible; rotating QR + live name board is the practical counter.
+Passwords for ~60–80 students create support load. Proxy (“give friend your phone”) is harder when they must present at the tripod under your glance.
 
 ## How we avoid cheating (layered)
 
-### Must-have (MVP)
+### Must-have (v0.2)
 
-1. **Rotating QR** (15–20s TTL) — kills screenshots and hallway lag.
-2. **Session must be open** — no check-in outside class window.
-3. **Section-bound** — INF231 token won’t mark INF232.
-4. **One check-in per student per session**.
-5. **Server time** for late codes.
-6. **Live projector feed of names** — social accountability (friend scanning for absent peer is visible).
-7. **Teacher override / audit** — `source = qr | manual | auto-absent`.
+1. **Teacher station** — check-in requires teacher-authenticated scan, not a public board token alone.
+2. **Proximity process** — phone must be placed under the tripod camera (classroom procedure, not GPS).
+3. **Visual glance** — name/ID on scan UI vs person at the table.
+4. **Session must be open** — no check-in outside class window.
+5. **Section-bound** student + one check-in per session.
+6. **Server time** for late codes.
+7. **Optional presence board** of names — social accountability.
+8. **Teacher override / audit** — `source = teacher_scan | manual | auto`.
 
-### Nice next (not Day 1–2 blockers)
+### Nice next (not v0.2 blockers)
 
-- Random 4-letter **spoken room code** shown with QR (must type after scan)
-- Rate-limit check-ins per IP
-- Optional “teacher lock check-ins” after first 20 minutes
+- Rate-limit scan attempts
+- Optional “lock station” after first N minutes
 - School SSO later
+- Refreshing student QR while waiting in line
 
-### What we do **not** chase in MVP
+### What we do **not** chase in v0.2
 
 - Face recognition
-- GPS geofence (flaky indoors; privacy complaints)
-- Perfect prevention of “buddy in the room scans two phones” — rare if names are announced/displayed live
+- GPS geofence
+- Classroom AP / offline-only network as security
+- Perfect prevention of “two phones in one pocket” if you are not looking
 
-## Realistic threat model (your classes)
+## Network / hosting note
 
-Most likely abuse: present student checks in an absent friend from inside the room.
-
-**Best cheap counter:** make check-ins **public in the room** (display + optional speak). Social pressure + you noticing a name for someone not there beats password accounts.
+App is on **public HTTPS**. Anyone with the URL can open student pages. Teacher PIN protects admin and Station Scan finalize. Do not treat “same Wi‑Fi as laptop” as a security boundary anymore.
 
 ## Decision
 
-- MVP: **no student passwords**; roster ID + confirm + rotating QR + live feed  
-- Phase 3: optional school SSO if the tool sticks  
-- Always keep **manual mark** for edge cases
+- v0.2: **no student passwords**; roster ID + confirm + personal QR + **teacher tripod scan** + optional live names  
+- Later: optional school SSO  
+- Always keep **manual mark** for dead phones  

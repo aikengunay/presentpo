@@ -1,118 +1,95 @@
 ---
 name: Attendance Tracker v0.2
-overview: "Post-MVP phase to make Attendance Tracker feel classroom-complete: in-app QR scan, stronger export/roster polish, session UX gaps, and a real AP rehearsal — without jumping to SSO or cloud host yet."
+overview: "v0.2 overhaul: public HTTPS host (Cloudflare + domain), no classroom AP/offline; tripod station where teacher phone scans student personal QR. Remove projector self-scan, LAN/mkcert/AP packaging, and related dead code."
 todos:
-  - id: p1-inapp-scan
-    content: "P1: In-app QR scan on /join + keep typed fallback; document LAN camera limits"
+  - id: p0-product-pivot-docs
+    content: "P0: Rewrite product refs for cloud host + tripod teacher-scan; retire AP/LAN/projector-self-scan; document remove/overhaul inventory"
     status: completed
-  - id: p2-session-ux
-    content: "P2: Today’s meeting highlight, cancel session without auto-0, demo section label, end→roster/export"
+  - id: p1-cloud-host
+    content: "P1: Domain + Cloudflare HTTPS; migrate off laptop-only SQLite to cloud DB; env/deploy docs; drop AP as runtime dependency"
     status: pending
-  - id: p3-export-roster
-    content: "P3: Export match by Student ID / late-add append; INF231+INF232 Excel smoke"
+  - id: p2-teacher-verify-checkin
+    content: "P2: Student personal QR + teacher continuous Scan (tripod); remove projector self-scan + student board camera; source=teacher_scan"
     status: pending
-  - id: p4-projector-polish
-    content: "P4: Projector recent names + roster/done polish; TTS stays optional off"
+  - id: p3-session-ux
+    content: "P3: Today’s meeting highlight, cancel without auto-0, demo label, end→roster/export"
     status: pending
-  - id: p5-classroom-packaging
-    content: "P5: Docker/AP runbook refresh; one-command smoke path"
+  - id: p4-export-roster
+    content: "P4: Export Student ID match / late-add; INF231+INF232 Excel smoke"
+    status: pending
+  - id: p5-live-room
+    content: "P5: Presence board only (no check-in QR); roster polish; TTS optional off"
     status: pending
   - id: p6-rehearsal-tag
-    content: "P6: Live AP rehearsal notes, fix blockers, tag v0.2.0"
+    content: "P6: Live classroom rehearsal on public URL + tripod station; notes; tag v0.2.0"
     status: pending
+  - id: superseded-ap-lan-mkcert
+    content: "SUPERSEDED: Classroom AP + LAN IP + mkcert for phones as primary runtime"
+    status: cancelled
+  - id: superseded-projector-self-scan
+    content: "SUPERSEDED: Student scans rotating projector QR / in-app board camera"
+    status: cancelled
 isProject: true
 ---
 
-# Attendance Tracker v0.2 — Classroom-complete
+# Attendance Tracker v0.2 — Cloud host + tripod station
 
-Baseline: **`v0.1.0-mvp`** ships import → session → rotating projector QR → check-in → overrides → gradebook export → demo section INF191. Next phase closes the gaps that make day-to-day teaching feel unfinished.
+Synced with Cursor plan `attendance_tracker_v0.2_df7c3cc1`.
 
-## What “complete” means for v0.2
+**Locks:** Public HTTPS (Cloudflare + domain); internet required; no classroom AP/offline; tripod teacher-scan of student personal QR.
 
-A teacher can run **real INF231/INF232 class meetings** on the AP laptop with:
-
-- Students checking in without confusion (scan in-app or OS camera)
-- Roster/export matching the perfect gradebook with fewer name mismatches
-- Clear session controls (start for today’s schedule, cancel without inventing absences)
-- One rehearsed classroom runbook that you trust
-
-**Explicitly deferred to later (not v0.2):** school Google SSO, Vercel/Postgres multi-tenant, geofence, Teams hooks, face recognition.
+## Target
 
 ```mermaid
-flowchart LR
-  subgraph v01 [v0.1_MVP]
-    Import --> Session
-    Session --> ProjQR
-    ProjQR --> CheckIn
-    CheckIn --> Export
+flowchart TB
+  subgraph cloud [Public HTTPS]
+    App[Next.js]
+    DB[(Cloud DB)]
   end
-  subgraph v02 [v0.2_Complete]
-    InAppScan --> CheckIn2[CheckIn]
-    SessionUX --> ProjQR2[Projector]
-    ExportHardening --> Gradebook
-    APRehearsal --> Tag_v020
-  end
-  v01 --> v02
+  Stud[Student shows QR] --> App
+  Tripod[Tripod Scan] --> App
 ```
 
-## Milestones (push after each)
+## Milestones
 
-### P1 — In-app QR scan on student join
+| ID | Focus |
+|----|--------|
+| P0 | Product refs + remove/overhaul inventory |
+| P1 | Domain + Cloudflare + cloud DB; drop AP runtime |
+| P2 | Personal QR + teacher Scan; **delete** old check-in gate |
+| P3 | Session UX |
+| P4 | Export / roster |
+| P5 | Presence board only |
+| P6 | Live rehearsal on public URL + tag `v0.2.0` |
 
-**Why:** Students ask “where’s the camera?”; OS camera works but in-app scan feels complete.
+## Remove (delete)
 
-- Add Scan QR on [`app/join/page.tsx`](../../app/join/page.tsx) (client island): `getUserMedia` + `html5-qrcode`
-- On success, navigate to same join URL shape: `?token=&sectionCode=` then existing server-action confirm path in [`app/join/actions.ts`](../../app/join/actions.ts)
-- Keep typeable fallback code; HTTPS/permission failures show a clear caption and fall back to OS camera / typed code
-- Note LAN HTTP camera limits in [`10-classroom-runbook.md`](../references/10-classroom-runbook.md)
+- Student `join-qr-scanner` / board camera on `/join`
+- Projector **check-in** QR page + `/api/sessions/.../qr` as gate + join board-token path
+- Typed projector fallback code
+- AP / LAN / same-SSID runbook and README checklist
+- mkcert classroom path (`certs:setup`, `start-https`, rootCA-on-phones) as required ops
+- `dev-with-qr.js` LAN classroom entry as product
+- Refs that ban teacher-scan or require AP
 
-### P2 — Session UX for real class days
+## Overhaul
 
-**Why:** MVP start is enough for demos; class days need clearer meeting choice and a safe abort.
+- Host behind Cloudflare + domain (HTTPS); pick Tunnel+VPS or Node host in P1 (prefer not full Workers rewrite unless chosen)
+- Prisma: laptop SQLite file → **cloud DB**
+- `/join`: show personal QR; wait for station scan
+- Teacher CTA: **Open station Scan** (not Projector QR)
+- Only teacher session can finalize scan
+- Projector → presence board (names/counts only)
+- Runbook: public URL → session → tripod → end → export
 
-- Section page: highlight **today’s** schedule template(s) (Manila date + `dayOfWeek`)
-- **Cancel / discard open session** without writing auto-`0`
-- After end: one-click to roster + export
-- Soft-label **INF191** as Demo in teacher UI so it never mixes with real sections
+## Keep
 
-### P3 — Export and roster hardening
+PIN, import, roster, session lifecycle, late codes, manual mark, Excel export, demo INF191, tests (adapt smoke base URL).
 
-**Why:** Name-only matching and late adds are the main gradebook risk.
+## Abandoned
 
-- Prefer matching export rows by **Student ID** when the workbook can carry/add an ID column; otherwise keep name match + improve normalization
-- Late adds in app: append midterms row (with MIDTERM formula copy) or fail loudly with actionable `_export_notes`
-- Re-export is idempotent for opened dates only; never invent `0` for unopened columns
-- Smoke test: INF231 + INF232 export opens in Excel; `summary` still computes
+AP network, no-internet mode, class-wide mkcert, student→projector QR primary.
 
-### P4 — Projector and live-room polish
+## Hosting default for P1
 
-**Why:** Social accountability is the anti-cheat layer you chose.
-
-- Projector: larger latest name, short recent list (last 5), optional TTS remains off by default
-- Roster: keyboard-friendly code set; filter unmarked default during open session
-- Student done page: clearer code meaning
-
-### P5 — Classroom packaging
-
-**Why:** One path for “open laptop, class starts in 2 minutes.”
-
-- `docker compose up --build` verified as primary classroom path; seed-demo documented
-- Refresh classroom runbook + README
-- One-command smoke: `npm test` + `npm run smoke:http` after start
-
-### P6 — Live AP rehearsal + tag
-
-**Why:** Completeness is proven in the room, not only in Vitest.
-
-- Dry-run INF231 **or** INF232 on teacher AP with 3–5 real phones
-- File issues in `.cursor/references/17-v0.2-rehearsal-notes.md`
-- Fix blockers from that run
-- Tag **`v0.2.0`** on `main` (no AI co-author trailers)
-
-## Out of scope for v0.2
-
-- Student password accounts / school SSO
-- Cloud deploy (Vercel) + Postgres
-- Geofence, device fingerprinting, face ID
-- Writing into `teaching/attendance/*.xlsx` outside the app’s template clone export
-- Multi-teacher / multi-tenant SaaS
+Cloudflare for DNS/HTTPS; run Next on a small always-on host (Tunnel or direct) + cloud Postgres/SQLite-on-server—unless explicitly choosing Workers+D1.

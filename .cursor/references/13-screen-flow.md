@@ -1,6 +1,6 @@
-# Screen flow (MVP wireframes)
+# Screen flow (v0.2)
 
-Do **not** invent extra pages beyond this list for the 2-day MVP.
+Do **not** invent extra pages beyond this list without updating this doc.
 
 ## Roles
 
@@ -8,7 +8,8 @@ Do **not** invent extra pages beyond this list for the 2-day MVP.
 |------|--------|
 | Teacher | `/teacher` — PIN gate |
 | Student | `/` or `/join` — no PIN |
-| Projector | `/teacher/sessions/[id]/projector` — opened by teacher after Start |
+| Station | `/teacher/sessions/[id]/scan` — tripod phone after Start |
+| Presence (optional) | `/teacher/sessions/[id]/board` (or renamed projector) — names only |
 
 ---
 
@@ -17,101 +18,92 @@ Do **not** invent extra pages beyond this list for the 2-day MVP.
 ### T0 — PIN login
 `/teacher/login`
 
-- Input: teacher PIN
-- Action: unlock teacher area (session cookie / signed cookie)
-- On success → T1
+- Input: teacher PIN → teacher cookie → T1
 
 ### T1 — Home (sections)
 `/teacher`
 
-- List sections (e.g. INF231MWA, INF232MWA)
-- Actions: open section → T2; Import classlist → T1b
+- List sections; Import classlist → T1b
 
 ### T1b — Import classlist
 `/teacher/import`
 
-- Upload Registrar `.xls` / TSV
-- Preview: section, schedules, student count, sample rows
-- Confirm → upsert section + students + meeting templates → T2
+- Upload Registrar `.xls` / TSV → preview → commit → T2
 
 ### T2 — Section detail
 `/teacher/sections/[sectionId]`
 
-- Roster (name, student ID)
-- Meeting list (from schedule templates × dates, or upcoming + past sessions)
-- Actions: open meeting → T3; add student manually (simple form)
+- Roster; meetings/sessions; start session; export
 
 ### T3 — Meeting / session control
-`/teacher/sections/[sectionId]/meetings/[meetingId]`
+(Section page or dedicated meeting view)
 
-- Show scheduled start/end, room
-- If no open session: **Start session** (optional: “T0 = now” vs scheduled)
-- If open: links to **Projector**, **Live roster**, **End session**
-- If closed: summary counts + **Export** + reopen overrides on T5
+- **Start session** / **End session** / **Cancel** (no auto-`0` on cancel — see edge cases)
+- If open: **Station Scan**, **Roster**, optional **Presence board**
 
-### T4 — Projector (QR + announcement)
-`/teacher/sessions/[sessionId]/projector`
+### T4 — Station Scan (primary check-in UI)
+`/teacher/sessions/[sessionId]/scan`
 
-- Huge rotating QR
-- Countdown to next rotate
-- Base URL / laptop IP hint
-- Latest check-in name (large)
-- Counts: checked in / roster
-- Toggle: **Announce names** (TTS, off by default)
-- Fallback code under QR (typeable if no camera)
+- Continuous camera (secure context / public HTTPS)
+- On decode: large **name + Student ID + section**
+- Confirm / Reject (or short auto-accept — product choice)
+- Stay on page for next student; clear errors for expired / already in / wrong session
+
+### T4b — Presence board (optional)
+`/teacher/sessions/[sessionId]/board` (replaces old projector check-in page)
+
+- Latest name + recent list + counts
+- **No** rotating check-in QR, **no** typed board fallback code
+- Optional TTS (off by default)
 
 ### T5 — Live roster / overrides
 `/teacher/sessions/[sessionId]/roster`
 
-- Table: student, code, source (`qr` / `manual` / `auto`), time
-- Search / filter unmarked
-- Actions: set code `0–4`, note; manual mark for no-phone
-- End session button (also on T3)
+- Table: student, code, source (`teacher_scan` / `manual` / `auto`), time
+- Manual mark for no-phone; End session
 
 ### T6 — Export
 `/teacher/sections/[sectionId]/export`
 
-- Date range or “all opened sessions”
-- Download `.xlsx` (flat + pivot grid)
-- No other analytics screens in MVP (`summary` stays in Excel)
+- Download `.xlsx` for opened sessions
 
 ---
 
 ## Student screens
 
 ### S1 — Identify
-`/join` (or `/`)
+`/join`
 
-- Enter Student ID
-- Lookup → show name → **This is me** / Not me
-- Remember ID in `localStorage` for next time (optional)
+- Section + Student ID → Find me → name confirm
+- **No** student camera / board QR scanner
 
-### S2 — Check in
-`/join/check-in`
+### S2 — Show personal QR
+`/join` (same flow step) or `/join/show`
 
-- Requires identified student + open session context from QR/token
-- Scan QR (camera) **or** type short code from projector
-- Submit → S3
+- Large QR for open session; short TTL; copy: place under station camera
+- Poll or refresh until checked in → S3
 
 ### S3 — Result
 `/join/done`
 
-- Success: code + plain language (“Late 15–30 min → code 2”)
-- Errors: expired token, already checked in, not in section, session closed
-- Button: done (no extra student dashboard in MVP)
+- Success: code + plain language
+- Errors: expired, already checked in, session closed, etc.
 
 ---
 
 ## Class-day click path (happy path)
 
-**Teacher:** T0 → T1 → T2 → T3 → Start → T4 (projector) → (teach) → T5/T3 End → T6 later  
+**Teacher:** T0 → T1 → T2 → Start → **T4 Station Scan** (tripod) → teach → End → T5/T6  
 
-**Student:** S1 → S2 → S3  
+**Student:** S1 → S2 (place phone on table) → S3  
 
-## Out of scope screens (do not build yet)
+## Retired screens (do not rebuild)
+
+- Projector page as rotating **check-in** QR + fallback code
+- Student “scan the board / Open camera” on `/join`
+
+## Out of scope screens
 
 - Student history / grade portal
 - Multi-teacher admin
-- Settings labyrinth
-- Dark analytics dashboard
 - Native mobile apps

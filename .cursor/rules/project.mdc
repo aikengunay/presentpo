@@ -7,42 +7,36 @@ alwaysApply: true
 
 ## Source of truth
 
-Read `.cursor/references/` before implementing product behavior:
+Read `.cursor/references/` before implementing product behavior. For v0.2 direction see also `.cursor/plans/attendance_tracker_v0.2_complete.plan.md`.
 
-- `01-product-brief.md` — problem, MVP goal, non-goals
-- `02-attendance-rules.md` — codes `0–4`, late windows, blank vs zero
-- `03-classlist-import.md` — Registrar TSV `.xls` parse
-- `04-session-lifecycle.md` — rotating QR, start/end session
-- `05-edge-cases.md` — proxy, timing, overrides
-- `06-stack.md` — Next.js + Prisma + SQLite
-- `07-phases-2day.md` — Day 1 / Day 2 exit criteria
-- `08-excel-export-compat.md` — export shape
-- `09-industry-notes.md` — why rotating QR
-- `10-classroom-runbook.md` — AP + laptop IP + QR
-- `11-anti-cheat-and-identity.md` — no student passwords in MVP
-- `12-checkin-announcements.md` — live name feed + optional TTS
-- `13-screen-flow.md` — allowed screens only
-- `14-data-model.md` — entities + uniqueness
-- `15-api-mvp.md` — endpoint ceiling
+Key refs:
 
-## Product locks (do not reopen without user ask)
+- `01-product-brief.md` — goal, non-goals
+- `02-attendance-rules.md` — codes `0–4`, late windows
+- `04-session-lifecycle.md` — open/close + tripod station check-in
+- `06-stack.md` — Next.js + Prisma; cloud host target
+- `10-classroom-runbook.md` — public URL + tripod station
+- `11-anti-cheat-and-identity.md` — teacher-scan + no student passwords
+- `13-screen-flow.md` — allowed screens
+- `14-data-model.md` — entities
+- `15-api-mvp.md` — endpoints
+- `18-v0.2-remove-overhaul.md` — what to delete vs rewrite
 
-- Primary flow: **student scans rotating classroom QR** (not teacher-scan-every-student)
-- Auto codes from server time vs session `T0`
-- Unopened sessions stay **blank**; opened + no check-in → **`0`**
-- Excel remains analytics/gradebook for MVP; app captures + exports
-- **No student password accounts in MVP** — Student ID + confirm + QR + one check-in
-- Classroom test: **local app + teacher AP** (not required cloud host)
-- Check-in UX: **live name display on**; **speak names optional** (off by default)
+## Product locks (v0.2 — do not reopen without user ask)
+
+- Hosting: **public HTTPS** (domain + Cloudflare); **internet required**
+- **No** classroom AP / offline LAN / mkcert-for-class as product path
+- Primary check-in: **tripod station** — teacher phone scans **student personal QR**
+- Student phone: identify → confirm → **display** QR (no student board-scan camera)
+- Auto codes from server time vs session `T0`; unopened stay blank; end → missing `0`
+- Excel remains gradebook; app captures + exports
+- **No** student password accounts; no face ID / geofence / SSO in v0.2
+- Presence board optional (names/counts only — **no** rotating check-in QR)
 
 ## Engineering norms
 
-- Prefer small vertical slices that hit Day 1/2 exit criteria
+- Prefer deleting dead paths in the same change as the replacement (see `18-v0.2-remove-overhaul.md`)
 - Pure functions for scoring (`lib/scoring`) with unit tests
 - Server time only for check-in timestamps
-- No face/biometric features in MVP
 - Do not expand to multi-tenant SaaS in this phase
-
-## When stuck
-
-Re-read `07-phases-2day.md` and cut scope before adding infrastructure.
+- Git: see `git-commits.mdc` — no push until user asks; conventional commits when committing

@@ -1,71 +1,46 @@
-# Stack (2-day MVP)
+# Stack
 
-Optimize for: ship a testable local demo fast, match teacher’s MERN familiarity, avoid cloud setup friction.
+Optimize for: testable product, teacher familiarity, then **public HTTPS** for the tripod station camera.
 
-## Chosen stack
+## Chosen stack (evolution)
 
 | Layer | Choice | Why |
 |-------|--------|-----|
-| App | **Next.js** (App Router) + **TypeScript** | One repo, API + UI, fast iteration |
-| UI | React + simple CSS (Tailwind optional) | Enough for teacher/student screens |
-| DB | **SQLite** via **Prisma 7** + `better-sqlite3` adapter | Zero install ops; file-based; easy reset |
-| Auth (MVP) | Teacher: shared PIN / password in env. Student: Student ID + last-name check | Fast; upgrade later |
-| QR | `qrcode` server/client + rotating token in DB | Standard |
-| Import | Custom TSV parser for Registrar `.xls` | Matches real university files |
-| Export | `exceljs` or `xlsx` → codes grid | Feeds existing attendance workbooks |
-| Hosting (test) | **Docker Compose** (preferred) or `next start` on laptop | Classroom AP + LAN IP; bind `0.0.0.0` |
+| App | **Next.js** (App Router) + **TypeScript** | One repo, API + UI |
+| UI | React + Tailwind | Teacher / student / station screens |
+| DB (dev) | SQLite via Prisma + `better-sqlite3` | Fast local iteration |
+| DB (prod v0.2) | **Cloud DB** (Postgres or equivalent — lock in deploy P1) | Public host; no laptop file DB in class |
+| Auth | Teacher PIN in env; student ID + confirm | Fast; SSO later |
+| Student QR | `qrcode` + short-lived personal token in DB | Display only on student phone |
+| Station scan | Camera + QR decode on **teacher** Scan page (`html5-qrcode` or similar) | Needs public HTTPS |
+| Import | Registrar TSV `.xls` parser | Real classlists |
+| Export | `exceljs` → gradebook templates | Existing Excel workflow |
+| Hosting (v0.2) | **Domain + Cloudflare** (HTTPS) + always-on Node host (Tunnel/VPS) or equivalent | Internet required; no classroom AP |
 
-## Run paths (classroom)
+## Run paths
 
-1. **Preferred:** `docker compose up` — app on host port `3000`, SQLite on a named/host volume (`./data`), listen on `0.0.0.0` so phones on the teacher AP can reach `http://<laptop-lan-ip>:3000`.
-2. **Dev:** `npm run dev` (or equivalent) with the same bind / env for local iteration.
-3. See `10-classroom-runbook.md` for AP + projector QR steps.
+1. **Production:** deployed public URL; Cloudflare DNS/TLS; cloud DB.
+2. **Local dev:** `npm run dev` on laptop for implementation only — not the class-day network model.
+3. Class day: see `10-classroom-runbook.md` (tripod + public `/join`).
 
-## Explicitly deferred
+## Explicitly deferred / abandoned as product path
 
-- Postgres / Supabase
-- NextAuth + Google Workspace
-- Mobile native apps
-- Realtime websockets (polling QR every few seconds is enough)
-- Multi-tenant SaaS
-- Cloud host (Vercel, etc.) for the first classroom test
+- Classroom AP + bind `0.0.0.0` as the way students reach the app
+- mkcert / LAN HTTPS for the whole class
+- Offline-only operation
+- Workers/OpenNext rewrite — only if chosen in P1 (default is Node host + Cloudflare for DNS/HTTPS)
 
-## Repo layout (target)
+## Repo layout
 
 ```
 attendance-tracker/
   .cursor/
-    references/     # product truth (this folder)
+    references/     # product truth
     rules/          # agent rules
     plans/          # phase checklists
-  app/              # Next.js app router
+  app/              # Next.js routes
   components/
-  lib/              # db, scoring, import, qr, export
+  lib/
   prisma/
-  public/
-  data/             # SQLite volume (gitignored)
-  Dockerfile
-  docker-compose.yml
-  README.md
-  AGENTS.md
+  scripts/          # dev/deploy helpers (no AP-required ops)
 ```
-
-## Environment (MVP)
-
-```bash
-DATABASE_URL="file:./data/dev.db"
-TEACHER_PIN="...."
-QR_ROTATE_SECONDS=20
-EARLY_CHECKIN_MINUTES=15
-TZ=Asia/Manila
-```
-
-## Scoring module
-
-Pure function, unit-tested:
-
-`scoreCheckIn({ t0, checkedInAt, earlyMinutes }) → 1|2|3|4`
-
-Session close:
-
-`markAbsences(sessionId) → set 0 for students without attendance row`

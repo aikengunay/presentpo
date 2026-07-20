@@ -2,42 +2,42 @@
 
 ## Problem
 
-During lecture/lab, late arrivals need attendance codes entered, but stopping mid-teaching to update Excel is distracting. Not all students arrive before the official start (e.g. before 3:00 PM). The teacher needs capture to happen **without interrupting teaching**.
+During lecture/lab, attendance must be captured without stopping mid-teaching to edit Excel. Late arrivals need fair codes. The teacher wants a **quick physical verify** that the person checking in is the roster student—without relying on a classroom access point or offline LAN.
 
-## Goal (2-day testable MVP)
+## Goal (v0.2)
 
-A small web app where:
+A web app hosted on a **public HTTPS domain** (Cloudflare) where:
 
-1. Teacher imports the university classlist (`.xls` / TSV from Registrar).
+1. Teacher imports the university classlist (Registrar `.xls` / TSV).
 2. Teacher starts a class session for a section + meeting.
-3. Students check in by scanning a **rotating classroom QR**.
-4. App assigns codes `1–4` or auto-`0` from arrival time.
-5. Teacher can override.
-6. Export matches the existing Excel attendance workflow under `teaching/attendance/`.
+3. Students open the site on any internet connection → Student ID → confirm name → **show a personal QR**.
+4. Teacher phone on a **tripod** (camera facing a table) runs the **Station Scan** page; students place their phone in frame.
+5. Teacher glances person ↔ name on screen → mark lands; app assigns codes `1–4` or auto-`0` from server time.
+6. Teacher can override; export matches existing Excel attendance workbooks.
 
-## Non-goals for MVP
+## Non-goals (v0.2)
 
-- Face recognition / biometrics
-- Teacher scanning every student as the primary flow
+- Classroom **AP / offline LAN** as the runtime network
+- Student scans a **rotating projector QR** as the primary check-in
+- Face recognition / biometrics / geofence
 - Full LMS integration (Canvas/Teams)
-- Perfect anti-cheat beyond rotating QR + time window + one check-in per student
-- Replacing Excel as long-term gradebook on day one (export first)
+- Student password accounts / school SSO
+- Multi-tenant SaaS
 
 ## Primary users
 
 | Role | Job |
 |------|-----|
-| Teacher | Import roster, start/end session, show QR, override, export |
-| Student | Log in / identify self, scan QR, see confirmation |
+| Teacher | Import roster, start/end session, run tripod Scan, override, export |
+| Student | Identify self, display personal QR at the station, see confirmation |
 
-## Success for the 2-day test
+## Success
 
-- Import INF231 + INF232 classlists successfully
-- Run one live or simulated session per section
-- Late rules produce correct codes
-- No-show becomes `0` after session end
+- App reachable at a stable `https://` domain
+- Tripod station check-in works on teacher iPhone (secure context)
+- Late rules produce correct codes; end session → missing `0`
 - Export usable in current attendance sheets
-- Teacher does not need to touch attendance mid-lecture
+- No AP gear or mkcert-on-phones in the class-day runbook
 
 ## Related teaching artifacts (outside this repo)
 
