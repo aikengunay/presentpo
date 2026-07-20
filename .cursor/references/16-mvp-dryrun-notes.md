@@ -36,6 +36,20 @@ See `10-classroom-runbook.md`. Checklist:
 5. Live roster override for no-phone
 6. End → export gradebook → open in Excel; confirm `summary` formulas still work
 
+## Demo section (walkthroughs)
+
+```bash
+npm run db:seed-demo
+```
+
+| Field | Value |
+|-------|--------|
+| Section | `INF191` |
+| Student ID | `2019-100265` |
+| Name | GUNAY, AIKEN JOAQUIN E. |
+
+Separate from INF231/INF232. Fixture: `fixtures/classlists/inf191-demo.xls`.
+
 ## Known MVP limits
 
 - Student match in export is by **name** (template has no Student ID column)

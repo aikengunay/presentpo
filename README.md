@@ -18,10 +18,31 @@ npx prisma migrate dev
 npm run dev
 ```
 
-- App: `http://localhost:3000` (bound to `0.0.0.0`)
+`npm run dev` prints your LAN URL + a terminal QR (same idea as taranood) so phones on the same Wi‑Fi/AP can open `http://<PC-IP>:3000`. Use that URL on the phone — not `localhost`.
+
+**Next.js 16 note:** phone access needs `allowedDevOrigins` (auto-filled from your LAN IPs in `next.config.ts`). Restart `npm run dev` after network/IP changes.
+
+- App: `http://localhost:3000` on this PC (bound to `0.0.0.0`)
 - Teacher: `/teacher` → PIN → import classlist → start session → projector
 - Student: scan QR or open `/join`
 - Export: section → **Export gradebook** → filled `midterms`/`finals`/`all`/`summary` workbook
+
+### Demo section (not a real class)
+
+For walkthroughs without touching INF231/INF232:
+
+```bash
+npm run db:seed-demo
+```
+
+| Field | Value |
+|-------|--------|
+| Section | `INF191` |
+| Student ID | `2019-100265` |
+| Name | GUNAY, AIKEN JOAQUIN E. |
+
+Use **INF191** → Start session → projector → phone joins with that Student ID.  
+Do not treat INF191 exports as term gradebooks (template fallback only).
 
 ```bash
 npm test                 # includes INF231/INF232 dry-run
