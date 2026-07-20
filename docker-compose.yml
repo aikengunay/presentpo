@@ -1,0 +1,16 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: file:/app/data/dev.db
+      TEACHER_PIN: ${TEACHER_PIN:-1234}
+      QR_ROTATE_SECONDS: ${QR_ROTATE_SECONDS:-20}
+      EARLY_CHECKIN_MINUTES: ${EARLY_CHECKIN_MINUTES:-15}
+      TZ: Asia/Manila
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

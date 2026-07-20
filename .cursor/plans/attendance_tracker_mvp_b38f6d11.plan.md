@@ -4,10 +4,10 @@ overview: Seven phase milestones with a git push after each. Day-0 docs to GitHu
 todos:
   - id: m1-git-day0
     content: "M1: no-co-author rule + AGENTS; git init; commit Day-0 docs/fixtures; push to origin main"
-    status: in_progress
+    status: completed
   - id: m2-scaffold-docker
     content: "M2: Next.js+Prisma+SQLite+Tailwind scaffold; Dockerfile+compose; .env.example; scoring test stub; commit+push"
-    status: pending
+    status: completed
   - id: m3-import-teacher
     content: "M3: teacher PIN auth; classlist TSV import; sections+roster UI; commit+push"
     status: pending

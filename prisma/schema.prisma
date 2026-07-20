@@ -1,0 +1,127 @@
+// Attendance Tracker MVP — see .cursor/references/14-data-model.md
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum SessionStatus {
+  open
+  closed
+}
+
+enum AttendanceSource {
+  qr
+  manual
+  auto
+}
+
+model Section {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  subjectName String
+  termLabel   String
+  createdAt   DateTime @default(now())
+
+  students  Student[]
+  templates MeetingTemplate[]
+  meetings  Meeting[]
+}
+
+model Student {
+  id        String   @id @default(cuid())
+  sectionId String
+  studentId String
+  name      String
+  email     String?
+  status    String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  section     Section      @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  attendances Attendance[]
+
+  @@unique([sectionId, studentId])
+  @@index([sectionId])
+}
+
+model MeetingTemplate {
+  id        String  @id @default(cuid())
+  sectionId String
+  dayOfWeek Int
+  startTime String
+  endTime   String
+  room      String?
+  roomType  String?
+  label     String?
+
+  section  Section   @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  meetings Meeting[]
+
+  @@unique([sectionId, dayOfWeek, startTime])
+}
+
+model Meeting {
+  id         String   @id @default(cuid())
+  sectionId  String
+  templateId String?
+  date       DateTime
+  startAt    DateTime
+  endAt      DateTime
+  title      String?
+
+  section  Section          @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  template MeetingTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  session  Session?
+
+  @@unique([sectionId, date, startAt])
+  @@index([sectionId])
+}
+
+model Session {
+  id             String        @id @default(cuid())
+  meetingId      String        @unique
+  status         SessionStatus @default(open)
+  t0             DateTime
+  openedAt       DateTime
+  closedAt       DateTime?
+  earlyMinutes   Int           @default(15)
+  autoAbsentDone Boolean       @default(false)
+
+  meeting     Meeting      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  qrTokens    QrToken[]
+  attendances Attendance[]
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  sessionId   String
+  studentId   String
+  code        Int
+  source      AttendanceSource
+  checkedInAt DateTime?
+  note        String?
+  updatedAt   DateTime         @updatedAt
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@index([sessionId])
+}
+
+model QrToken {
+  id        String   @id @default(cuid())
+  sessionId String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, expiresAt])
+}

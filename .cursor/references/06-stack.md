@@ -8,7 +8,7 @@ Optimize for: ship a testable local demo fast, match teacher’s MERN familiarit
 |-------|--------|-----|
 | App | **Next.js** (App Router) + **TypeScript** | One repo, API + UI, fast iteration |
 | UI | React + simple CSS (Tailwind optional) | Enough for teacher/student screens |
-| DB | **SQLite** via **Prisma** | Zero install ops; file-based; easy reset |
+| DB | **SQLite** via **Prisma 7** + `better-sqlite3` adapter | Zero install ops; file-based; easy reset |
 | Auth (MVP) | Teacher: shared PIN / password in env. Student: Student ID + last-name check | Fast; upgrade later |
 | QR | `qrcode` server/client + rotating token in DB | Standard |
 | Import | Custom TSV parser for Registrar `.xls` | Matches real university files |
