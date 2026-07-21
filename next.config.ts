@@ -20,7 +20,9 @@ function lanDevOrigins(): string[] {
 }
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Standalone is for Docker image builds only. On Railway, full Next start
+  // needs a normal node_modules tree (prisma migrate used to fail in slim runtime).
+  ...(process.env.OUTPUT_STANDALONE === "1" ? { output: "standalone" as const } : {}),
   allowedDevOrigins: lanDevOrigins(),
   outputFileTracingIncludes: {
     "/**": [

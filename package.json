@@ -7,7 +7,7 @@
     "dev:http": "next dev --hostname 0.0.0.0 --port 3000",
     "dev:lan-qr": "node scripts/dev-with-qr.js",
     "build": "prisma generate && next build",
-    "start": "prisma migrate deploy && next start --hostname 0.0.0.0 --port ${PORT:-3000}",
+    "start": "next start --hostname 0.0.0.0 --port ${PORT:-3000}",
     "start:http": "next start --hostname 0.0.0.0 --port ${PORT:-3000}",
     "certs:setup": "bash scripts/setup-local-https.sh",
     "start:https-local": "node scripts/start-https.js",

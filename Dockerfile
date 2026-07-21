@@ -15,6 +15,7 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV OUTPUT_STANDALONE=1
 # Generate client only; migrate runs at container start against real DATABASE_URL
 ENV DATABASE_URL="postgresql://presentpo:presentpo@127.0.0.1:5432/presentpo?schema=public"
 RUN npx prisma generate && npm run build
