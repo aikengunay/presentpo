@@ -12,7 +12,7 @@ Class attendance for CTADWEBL without mid-lecture Excel. **v0.2 direction:** pub
 Needs Docker for Postgres:
 
 ```bash
-cp .env.example .env   # set TEACHER_PIN
+cp .env.example .env   # set TEACHER_PASSWORD
 docker compose up -d db
 npm install
 npx prisma migrate deploy
@@ -21,7 +21,7 @@ npm run dev
 ```
 
 - App: `http://localhost:3000`
-- Teacher: `/teacher` → PIN
+- Teacher: `/teacher` → password (add passkey from Security panel)
 - Students (eventually): `/join` on **https://presentpo.com**
 
 Deploy: [`docs/deploy-presentpo.md`](docs/deploy-presentpo.md).
@@ -36,7 +36,7 @@ npm run start
 
 1. Host Next.js + Postgres (Railway recommended).
 2. Point Cloudflare DNS for `presentpo.com` at the host.
-3. Set `DATABASE_URL`, `TEACHER_PIN`, `PUBLIC_APP_URL=https://presentpo.com`.
+3. Set `DATABASE_URL`, `TEACHER_PASSWORD`, `PUBLIC_APP_URL=https://presentpo.com`.
 
 Full steps: [`docs/deploy-presentpo.md`](docs/deploy-presentpo.md).  
 Class-day runbook: [`.cursor/references/10-classroom-runbook.md`](.cursor/references/10-classroom-runbook.md).
@@ -46,7 +46,7 @@ Class-day runbook: [`.cursor/references/10-classroom-runbook.md`](.cursor/refere
 | Variable | Purpose |
 |----------|---------|
 | `DATABASE_URL` | PostgreSQL connection string |
-| `TEACHER_PIN` | Teacher gate |
+| `TEACHER_PASSWORD` | Teacher gate (`TEACHER_PIN` fallback) |
 | `PUBLIC_APP_URL` | Canonical HTTPS origin (`https://presentpo.com`) |
 | `EARLY_CHECKIN_MINUTES` | Early check-in window (default 15) |
 | `TZ` | `Asia/Manila` |

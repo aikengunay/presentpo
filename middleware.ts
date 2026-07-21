@@ -13,7 +13,12 @@ async function isAuthed(req: NextRequest): Promise<boolean> {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (pathname === "/api/teacher/login") {
+  // Public teacher auth endpoints (password + passkey login)
+  if (
+    pathname === "/api/teacher/login" ||
+    pathname === "/api/teacher/webauthn/status" ||
+    pathname.startsWith("/api/teacher/webauthn/auth/")
+  ) {
     return NextResponse.next();
   }
 
@@ -38,7 +43,7 @@ export async function middleware(req: NextRequest) {
   if (!(await isAuthed(req))) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json(
-        { error: "UNAUTHORIZED", message: "Teacher PIN required" },
+        { error: "UNAUTHORIZED", message: "Teacher authentication required" },
         { status: 401 },
       );
     }

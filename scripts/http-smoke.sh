@@ -4,7 +4,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BASE="${SMOKE_BASE:-http://127.0.0.1:3000}"
-PIN="${TEACHER_PIN:-1234}"
+PASSWORD="${TEACHER_PASSWORD:-${TEACHER_PIN:-1234}}"
 TLS_OPTS=()
 if [[ "$BASE" == https://* ]]; then
   if [[ -f "$ROOT/certs/rootCA.pem" ]]; then
@@ -23,7 +23,7 @@ curl -fsS "${TLS_OPTS[@]}" "$BASE/" >/dev/null
 echo "== teacher login =="
 curl -fsS "${TLS_OPTS[@]}" -c "$COOKIE_JAR" -b "$COOKIE_JAR" \
   -H 'Content-Type: application/json' \
-  -d "{\"pin\":\"$PIN\"}" \
+  -d "{\"password\":\"$PASSWORD\"}" \
   "$BASE/api/teacher/login" | grep -q '"ok":true'
 
 echo "== sections list =="

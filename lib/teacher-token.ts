@@ -6,8 +6,16 @@ function toHex(bytes: ArrayBuffer): string {
     .join("");
 }
 
+function teacherHmacSecret(): string {
+  return (
+    process.env.TEACHER_PASSWORD ||
+    process.env.TEACHER_PIN ||
+    "dev-only-unset-password"
+  );
+}
+
 export async function teacherSessionToken(): Promise<string> {
-  const secret = process.env.TEACHER_PIN || "dev-only-unset-pin";
+  const secret = teacherHmacSecret();
   const key = await crypto.subtle.importKey(
     "raw",
     new TextEncoder().encode(secret),

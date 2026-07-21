@@ -22,10 +22,14 @@ Class day does **not** use a teacher AP or laptop SQLite.
 | Variable | Value |
 |----------|--------|
 | `DATABASE_URL` | From Railway Postgres |
-| `TEACHER_PIN` | Strong PIN |
+| `TEACHER_PASSWORD` | Strong teacher password (Apple Passwords / managers OK) |
 | `PUBLIC_APP_URL` | `https://presentpo.com` |
 | `TZ` | `Asia/Manila` |
 | `EARLY_CHECKIN_MINUTES` | `15` |
+
+`TEACHER_PIN` still works as a fallback until you remove it. After deploy: set `TEACHER_PASSWORD` to the same value, confirm login, then delete `TEACHER_PIN`.
+
+Passkeys: after password login, use **Add passkey** on the teacher home Security panel. WebAuthn `rpID` comes from `PUBLIC_APP_URL` host (`presentpo.com`) — enroll on the custom domain, not the Railway `*.up.railway.app` URL.
 
 5. Note the Railway public URL (e.g. `xxx.up.railway.app`).
 
@@ -46,10 +50,10 @@ SSL/TLS mode: **Full (strict)** once Railway serves HTTPS (their default).
 
 ```bash
 curl -fsS https://presentpo.com/ | head
-SMOKE_BASE=https://presentpo.com TEACHER_PIN='…' npm run smoke:http
+SMOKE_BASE=https://presentpo.com TEACHER_PASSWORD='…' npm run smoke:http
 ```
 
-Teacher phone (tripod): open `https://presentpo.com/teacher` — camera will work on real HTTPS after P2 Station Scan lands.
+Teacher: `https://presentpo.com/teacher/login` — password and optional passkey. Tripod camera needs HTTPS after Station Scan lands.
 
 ## Local development (Postgres)
 

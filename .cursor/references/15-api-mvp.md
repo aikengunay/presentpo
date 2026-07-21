@@ -1,6 +1,6 @@
 # API (v0.2 target)
 
-Teacher routes require PIN session. Student identify/show-QR does not finalize attendance.  
+Teacher routes require password (or passkey) session. Student identify/show-QR does not finalize attendance.  
 **Station scan finalize is teacher-auth only.**
 
 Keep handlers thin; scoring/import/export live in `lib/`.
@@ -9,8 +9,15 @@ Keep handlers thin; scoring/import/export live in `lib/`.
 
 | Method | Path | Auth | Purpose |
 |--------|------|------|---------|
-| `POST` | `/api/teacher/login` | public | `{ pin }` → teacher cookie |
+| `POST` | `/api/teacher/login` | public | `{ password }` → teacher cookie (`pin` alias OK) |
 | `POST` | `/api/teacher/logout` | teacher | Clear cookie |
+| `GET` | `/api/teacher/webauthn/status` | public | `{ hasPasskeys }` for login CTA |
+| `POST` | `/api/teacher/webauthn/auth/options` | public | Passkey login options |
+| `POST` | `/api/teacher/webauthn/auth/verify` | public | Passkey assertion → cookie |
+| `POST` | `/api/teacher/webauthn/register/options` | teacher | Passkey enrollment options |
+| `POST` | `/api/teacher/webauthn/register/verify` | teacher | Persist new passkey |
+| `GET` | `/api/teacher/webauthn/passkeys` | teacher | List passkeys |
+| `DELETE` | `/api/teacher/webauthn/passkeys/[id]` | teacher | Remove passkey |
 
 ---
 

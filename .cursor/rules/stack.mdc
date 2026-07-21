@@ -12,7 +12,7 @@ alwaysApply: false
 - **Production:** `https://presentpo.com` — Cloudflare DNS → always-on host (see `docs/deploy-presentpo.md`)
 - Local DB: `docker compose up -d db` with URL in `.env.example`
 - Domain logic in `lib/`; API under `app/api/`
-- Env: `DATABASE_URL`, `TEACHER_PIN`, `PUBLIC_APP_URL`, `EARLY_CHECKIN_MINUTES`, `TZ`
+- Env: `DATABASE_URL`, `TEACHER_PASSWORD` (`TEACHER_PIN` fallback), `PUBLIC_APP_URL`, `EARLY_CHECKIN_MINUTES`, `TZ`
 - No SQLite `file:` URLs
 
 ## Scoring

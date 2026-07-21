@@ -125,3 +125,16 @@ model QrToken {
 
   @@index([sessionId, expiresAt])
 }
+
+/// WebAuthn credentials for the single teacher account.
+model TeacherPasskey {
+  id           String   @id @default(cuid())
+  credentialId String   @unique
+  publicKey    Bytes
+  counter      BigInt   @default(0)
+  transports   String[] @default([])
+  deviceType   String?
+  backedUp     Boolean  @default(false)
+  label        String?
+  createdAt    DateTime @default(now())
+}

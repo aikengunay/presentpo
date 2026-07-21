@@ -198,6 +198,8 @@ describe("M7 dry-run INF231 + INF232", () => {
   it("AP runbook env defaults are sane", () => {
     expect(Number(process.env.QR_ROTATE_SECONDS ?? 20)).toBeGreaterThanOrEqual(5);
     expect(Number(process.env.EARLY_CHECKIN_MINUTES ?? 15)).toBeGreaterThanOrEqual(0);
-    expect(process.env.TEACHER_PIN || "1234").toBeTruthy();
+    expect(
+      process.env.TEACHER_PASSWORD || process.env.TEACHER_PIN || "1234",
+    ).toBeTruthy();
   });
 });

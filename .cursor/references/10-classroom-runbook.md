@@ -13,7 +13,7 @@ v0.2 runtime: app on **public HTTPS** at **`https://presentpo.com`** (Cloudflare
 ## Before term / once
 
 1. Deploy app behind Cloudflare + domain (see plan P1 / deploy docs).
-2. Set `TEACHER_PIN` and cloud DB in production env.
+2. Set `TEACHER_PASSWORD` and cloud DB in production env.
 3. Import INF231 / INF232 classlists (or seed demo INF191 for practice).
 4. On **teacher phone only**: open `https://<domain>/teacher` once; allow camera for Station Scan when prompted.
 

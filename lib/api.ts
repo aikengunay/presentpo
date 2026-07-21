@@ -9,5 +9,5 @@ export function jsonError(
 }
 
 export function unauthorized() {
-  return jsonError("UNAUTHORIZED", "Teacher PIN required", 401);
+  return jsonError("UNAUTHORIZED", "Teacher authentication required", 401);
 }

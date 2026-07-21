@@ -1,15 +1,19 @@
 import Link from "next/link";
+import { PasskeySecurityPanel } from "@/components/PasskeySecurityPanel";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function TeacherHomePage() {
-  const sections = await prisma.section.findMany({
-    orderBy: { code: "asc" },
-    include: {
-      _count: { select: { students: true, templates: true } },
-    },
-  });
+  const [sections, passkeyCount] = await Promise.all([
+    prisma.section.findMany({
+      orderBy: { code: "asc" },
+      include: {
+        _count: { select: { students: true, templates: true } },
+      },
+    }),
+    prisma.teacherPasskey.count(),
+  ]);
 
   return (
     <main className="flex flex-col gap-6">
@@ -22,11 +26,13 @@ export default async function TeacherHomePage() {
         </div>
         <Link
           href="/teacher/import"
-          className="rounded bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
+          className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
         >
           Import classlist
         </Link>
       </div>
+
+      <PasskeySecurityPanel autoPrompt={passkeyCount === 0} />
 
       {sections.length === 0 ? (
         <p className="rounded border border-dashed border-zinc-300 bg-white px-4 py-8 text-center text-sm text-zinc-600">

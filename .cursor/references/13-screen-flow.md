@@ -18,7 +18,7 @@ Do **not** invent extra pages beyond this list without updating this doc.
 ### T0 — PIN login
 `/teacher/login`
 
-- Input: teacher PIN → teacher cookie → T1
+- Input: teacher password or passkey → teacher cookie → T1
 
 ### T1 — Home (sections)
 `/teacher`
