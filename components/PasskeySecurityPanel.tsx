@@ -70,7 +70,7 @@ export function PasskeySecurityPanel({
       await enrollTeacherPasskey();
       await load();
       setShowOffer(false);
-      setSuccess("Passkey enrolled. Next visit you can sign in with it from the password field.");
+      setSuccess("Passkey enrolled. Next visit you can sign in with it from the login page.");
     } catch (err) {
       if (err instanceof Error && err.name === "NotAllowedError") {
         setError(
@@ -149,8 +149,8 @@ export function PasskeySecurityPanel({
               Set up a passkey?
             </h2>
             <p className="mt-2 text-sm text-zinc-600">
-              Next time you can unlock with Face ID / Touch ID when you focus the password
-              field — no need to tap a separate button.
+              Next time you can unlock with Face ID / Touch ID from the login page — password
+              stays as a backup.
             </p>
             {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -181,8 +181,7 @@ export function PasskeySecurityPanel({
             <h2 className="text-sm font-semibold tracking-tight">Security · Passkeys</h2>
             <p className="mt-1 text-sm text-zinc-600">
               Manage devices that can unlock teacher access. Password always remains a
-              backup. If focus-to-passkey on login fails, remove old keys and add a new
-              one (new enrollments are discoverable).
+              backup. If passkey sign-in fails, remove old keys and add a new one.
             </p>
           </div>
           <button

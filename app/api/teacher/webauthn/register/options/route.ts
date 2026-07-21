@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import {
   TEACHER_WEBAUTHN_USER_ID,
   TEACHER_WEBAUTHN_USER_NAME,
-  asTransports,
+  toAuthenticatorTransports,
   storeWebAuthnChallenge,
   webAuthnRpConfig,
 } from "@/lib/webauthn";
@@ -30,10 +30,10 @@ export async function POST(req: Request) {
     attestationType: "none",
     excludeCredentials: existing.map((p) => ({
       id: p.credentialId,
-      transports: asTransports(p.transports),
+      transports: toAuthenticatorTransports(p.transports),
     })),
     authenticatorSelection: {
-      // Required so Conditional UI can offer the passkey on password focus
+      // Discoverable credential so login can offer passkey without username
       residentKey: "required",
       userVerification: "preferred",
     },

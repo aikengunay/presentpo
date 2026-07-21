@@ -31,6 +31,8 @@ Class day does **not** use a teacher AP or laptop SQLite.
 
 Passkeys: after password login, use **Add passkey** on the teacher home Security panel. WebAuthn `rpID` comes from `PUBLIC_APP_URL` host (`presentpo.com`) — enroll on the custom domain, not the Railway `*.up.railway.app` URL.
 
+Login rate limits and WebAuthn challenges are stored **in-memory on each app instance** (reset on restart; not shared across multiple replicas). Fine for a single Railway service; use Redis if you scale out.
+
 5. Note the Railway public URL (e.g. `xxx.up.railway.app`).
 
 ### 2. Cloudflare DNS for `presentpo.com`
@@ -58,7 +60,7 @@ Teacher: `https://presentpo.com/teacher/login` — password and optional passkey
 ## Local development (Postgres)
 
 ```bash
-cp .env.example .env   # set TEACHER_PIN
+cp .env.example .env   # set TEACHER_PASSWORD
 npm install
 ```
 

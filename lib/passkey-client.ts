@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  browserSupportsWebAuthnAutofill,
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
@@ -57,32 +56,22 @@ export async function authenticateTeacherPasskey(opts?: {
   }
 }
 
-export async function supportsPasskeyAutofill(): Promise<boolean> {
-  try {
-    return await browserSupportsWebAuthnAutofill();
-  } catch {
-    return false;
-  }
-}
+const SKIP_AUTO_KEY = "presentpo.login.skipAutoPasskey";
+const OFFERED_AUTO_KEY = "presentpo.login.autoPasskeyOffered";
 
-/** Set on logout so the next login landing skips auto passkey prompt. */
-export const SKIP_AUTO_PASSKEY_KEY = "presentpo.login.skipAutoPasskey";
-/** Once auto-offered in this tab, don't auto again until a new tab. */
-export const AUTO_PASSKEY_OFFERED_KEY = "presentpo.login.autoPasskeyOffered";
-
-export function markSkipAutoPasskeyOnNextLogin(): void {
+/** After logout: skip one auto passkey prompt on the login page. */
+export function skipAutoPasskeyOnce(): void {
   try {
-    sessionStorage.setItem(SKIP_AUTO_PASSKEY_KEY, "1");
+    sessionStorage.setItem(SKIP_AUTO_KEY, "1");
   } catch {
     /* ignore */
   }
 }
 
-/** Returns true once if logout asked us to skip; clears the flag. */
-export function consumeSkipAutoPasskey(): boolean {
+function takeSkipAutoPasskey(): boolean {
   try {
-    if (sessionStorage.getItem(SKIP_AUTO_PASSKEY_KEY) !== "1") return false;
-    sessionStorage.removeItem(SKIP_AUTO_PASSKEY_KEY);
+    if (sessionStorage.getItem(SKIP_AUTO_KEY) !== "1") return false;
+    sessionStorage.removeItem(SKIP_AUTO_KEY);
     return true;
   } catch {
     return false;
@@ -104,21 +93,21 @@ function isReloadOrBackForward(): boolean {
  * Whether to auto-show the passkey sheet on this login page load.
  * Skips: post-logout, refresh/back, already offered in this tab.
  */
-export function shouldAutoOfferPasskey(): boolean {
-  if (consumeSkipAutoPasskey()) return false;
+export function canAutoPasskey(): boolean {
+  if (takeSkipAutoPasskey()) return false;
   if (isReloadOrBackForward()) return false;
   try {
-    if (sessionStorage.getItem(AUTO_PASSKEY_OFFERED_KEY) === "1") return false;
+    if (sessionStorage.getItem(OFFERED_AUTO_KEY) === "1") return false;
   } catch {
     /* ignore */
   }
   return true;
 }
 
-/** Call when starting an auto passkey offer in this tab. */
-export function markAutoPasskeyOffered(): void {
+/** Remember that this tab already auto-offered passkey. */
+export function noteAutoPasskeyShown(): void {
   try {
-    sessionStorage.setItem(AUTO_PASSKEY_OFFERED_KEY, "1");
+    sessionStorage.setItem(OFFERED_AUTO_KEY, "1");
   } catch {
     /* ignore */
   }

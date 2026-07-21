@@ -2,8 +2,8 @@
 
 import {
   authenticateTeacherPasskey,
-  markAutoPasskeyOffered,
-  shouldAutoOfferPasskey,
+  canAutoPasskey,
+  noteAutoPasskeyShown,
 } from "@/lib/passkey-client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,7 +19,7 @@ function LoginForm() {
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [hasPasskeys, setHasPasskeys] = useState(false);
   const [statusLoaded, setStatusLoaded] = useState(false);
-  const [allowAutoPasskey] = useState(() => shouldAutoOfferPasskey());
+  const [allowAutoPasskey] = useState(() => canAutoPasskey());
   const nextRef = useRef(nextPath);
   nextRef.current = nextPath;
 
@@ -54,7 +54,7 @@ function LoginForm() {
   useEffect(() => {
     if (!statusLoaded || !hasPasskeys || !allowAutoPasskey) return;
     let cancelled = false;
-    markAutoPasskeyOffered();
+    noteAutoPasskeyShown();
 
     (async () => {
       setPasskeyLoading(true);
@@ -77,7 +77,7 @@ function LoginForm() {
     };
   }, [statusLoaded, hasPasskeys, allowAutoPasskey]);
 
-  async function runPasskeyButton() {
+  async function signInWithPasskey() {
     if (passkeyLoading || loading) return;
     setPasskeyLoading(true);
     setError(null);
@@ -184,7 +184,7 @@ function LoginForm() {
 
               <button
                 type="button"
-                onClick={() => void runPasskeyButton()}
+                onClick={() => void signInWithPasskey()}
                 disabled={passkeyLoading || loading}
                 className="w-full rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 disabled:opacity-60"
               >

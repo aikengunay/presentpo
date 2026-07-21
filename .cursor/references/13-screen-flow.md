@@ -6,8 +6,8 @@ Do **not** invent extra pages beyond this list without updating this doc.
 
 | Role | Entry |
 |------|--------|
-| Teacher | `/teacher` — PIN gate |
-| Student | `/` or `/join` — no PIN |
+| Teacher | `/teacher` — password / passkey gate |
+| Student | `/` or `/join` — no teacher auth |
 | Station | `/teacher/sessions/[id]/scan` — tripod phone after Start |
 | Presence (optional) | `/teacher/sessions/[id]/board` (or renamed projector) — names only |
 
@@ -15,7 +15,7 @@ Do **not** invent extra pages beyond this list without updating this doc.
 
 ## Teacher screens
 
-### T0 — PIN login
+### T0 — Teacher login
 `/teacher/login`
 
 - Input: teacher password or passkey → teacher cookie → T1

@@ -1,4 +1,8 @@
-type Bucket = { failures: number[]; };
+/**
+ * In-process login failure buckets (not shared across replicas / restarts).
+ * Fine for a single teacher instance; use Redis if you scale out.
+ */
+type Bucket = { failures: number[] };
 
 const buckets = new Map<string, Bucket>();
 

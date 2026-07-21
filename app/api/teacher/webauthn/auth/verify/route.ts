@@ -2,7 +2,7 @@ import { setTeacherSessionCookie } from "@/lib/auth";
 import { jsonError } from "@/lib/api";
 import { prisma } from "@/lib/db";
 import {
-  asTransports,
+  toAuthenticatorTransports,
   consumeWebAuthnChallenge,
   webAuthnRpConfig,
 } from "@/lib/webauthn";
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         id: passkey.credentialId,
         publicKey: new Uint8Array(passkey.publicKey),
         counter: Number(passkey.counter),
-        transports: asTransports(passkey.transports),
+        transports: toAuthenticatorTransports(passkey.transports),
       },
       requireUserVerification: false,
     });

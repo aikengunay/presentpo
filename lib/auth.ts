@@ -1,14 +1,14 @@
 import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { teacherSessionToken, tokensEqual } from "@/lib/teacher-token";
+import {
+  teacherPasswordSecret,
+  teacherSessionToken,
+  tokensEqual,
+} from "@/lib/teacher-token";
 import type { NextResponse } from "next/server";
 
 export const TEACHER_COOKIE = "teacher_session";
-
-/** Prefer TEACHER_PASSWORD; fall back to TEACHER_PIN for one release. */
-export function teacherPasswordSecret(): string {
-  return process.env.TEACHER_PASSWORD || process.env.TEACHER_PIN || "";
-}
+export { teacherPasswordSecret };
 
 export function verifyTeacherPassword(password: string): boolean {
   const expected = teacherPasswordSecret();

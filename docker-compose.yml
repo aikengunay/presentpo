@@ -23,7 +23,7 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://presentpo:presentpo@db:5432/presentpo?schema=public
-      TEACHER_PIN: ${TEACHER_PIN:-1234}
+      TEACHER_PASSWORD: ${TEACHER_PASSWORD:-1234}
       EARLY_CHECKIN_MINUTES: ${EARLY_CHECKIN_MINUTES:-15}
       PUBLIC_APP_URL: ${PUBLIC_APP_URL:-http://localhost:3000}
       TZ: Asia/Manila

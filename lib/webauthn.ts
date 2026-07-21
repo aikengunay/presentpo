@@ -1,6 +1,10 @@
 import type { AuthenticatorTransportFuture } from "@simplewebauthn/server";
 
-/** challenge → expiresAt */
+/**
+ * In-process challenge store (not shared across Railway replicas / restarts).
+ * Fine for a single teacher instance; use Redis if you scale out.
+ * Map: challenge → expiresAt
+ */
 const challenges = new Map<string, number>();
 const TTL_MS = 5 * 60 * 1000;
 
@@ -74,7 +78,7 @@ export function webAuthnRpConfig(req?: Request): {
 export const TEACHER_WEBAUTHN_USER_ID = new TextEncoder().encode("teacher");
 export const TEACHER_WEBAUTHN_USER_NAME = "teacher@presentpo.com";
 
-export function asTransports(
+export function toAuthenticatorTransports(
   values: string[],
 ): AuthenticatorTransportFuture[] | undefined {
   if (!values.length) return undefined;
