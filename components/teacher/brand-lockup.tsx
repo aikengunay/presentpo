@@ -6,12 +6,18 @@ const sizeStyles = {
   default: {
     mark: "size-7",
     markPx: 28,
-    text: "text-base",
+    text: "text-base font-bold",
   },
   lg: {
     mark: "size-8",
     markPx: 32,
-    text: "text-xl",
+    text: "text-xl font-bold",
+  },
+  /** Join / splash — Duo-like brand hero */
+  hero: {
+    mark: "size-12",
+    markPx: 48,
+    text: "text-3xl font-extrabold tracking-tight sm:text-4xl",
   },
 } as const;
 
@@ -29,7 +35,11 @@ export function BrandLockup({
   return (
     <Link
       href={href}
-      className={cn("flex items-center gap-1.5 font-brand", className)}
+      className={cn(
+        "flex items-center gap-2 font-brand",
+        size === "hero" && "gap-2.5",
+        className,
+      )}
     >
       <img
         src="/brand/brand.png"
@@ -38,14 +48,7 @@ export function BrandLockup({
         height={styles.markPx}
         className={styles.mark}
       />
-      <span
-        className={cn(
-          "font-semibold tracking-tight text-foreground",
-          styles.text,
-        )}
-      >
-        PresentPo
-      </span>
+      <span className={cn("text-foreground", styles.text)}>PresentPo</span>
     </Link>
   );
 }

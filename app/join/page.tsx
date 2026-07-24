@@ -41,19 +41,19 @@ export default async function JoinPage({ searchParams }: Props) {
       ) : (
         <div className="flex min-h-[calc(100svh-2rem)] w-full max-w-sm flex-col md:min-h-[calc(100svh-5rem)]">
           <div className="flex flex-1 flex-col justify-center gap-8 py-6">
-            <BrandLockup className="self-center" size="lg" />
+            <BrandLockup className="self-center" size="hero" />
 
             <div className="space-y-2 text-center">
-              <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
                 Check in
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-[15px] leading-snug text-muted-foreground sm:text-base">
                 Enter your section and student ID.
               </p>
             </div>
 
             {error ? (
-              <p className="rounded-xl bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+              <p className="rounded-[12px] bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
                 {error}
               </p>
             ) : null}
@@ -72,7 +72,7 @@ export default async function JoinPage({ searchParams }: Props) {
                   autoCorrect="off"
                   spellCheck={false}
                   required
-                  className="presentpo-input-join h-12 rounded-[12px] border-2 border-border bg-background px-3.5 text-base shadow-none transition-[color,background-color,border-color,box-shadow] hover:border-foreground/40 hover:bg-muted/40 focus-visible:border-primary focus-visible:bg-[color-mix(in_oklch,var(--primary)_6%,white)] focus-visible:ring-3 focus-visible:ring-primary/20"
+                  className="presentpo-input-join h-12 rounded-[12px] border-2 border-border bg-muted/50 px-3.5 text-base shadow-none transition-[color,background-color,border-color,box-shadow] hover:border-foreground/35 hover:bg-muted/70 focus-visible:border-primary focus-visible:bg-background focus-visible:ring-3 focus-visible:ring-primary/20"
                 />
               </div>
               <div className="flex flex-col gap-2">
@@ -89,27 +89,27 @@ export default async function JoinPage({ searchParams }: Props) {
                   autoCorrect="off"
                   spellCheck={false}
                   required
-                  className="presentpo-input-join h-12 rounded-[12px] border-2 border-border bg-background px-3.5 font-mono text-base shadow-none transition-[color,background-color,border-color,box-shadow] hover:border-foreground/40 hover:bg-muted/40 focus-visible:border-primary focus-visible:bg-[color-mix(in_oklch,var(--primary)_6%,white)] focus-visible:ring-3 focus-visible:ring-primary/20"
+                  className="presentpo-input-join h-12 rounded-[12px] border-2 border-border bg-muted/50 px-3.5 font-mono text-base shadow-none transition-[color,background-color,border-color,box-shadow] hover:border-foreground/35 hover:bg-muted/70 focus-visible:border-primary focus-visible:bg-background focus-visible:ring-3 focus-visible:ring-primary/20"
                 />
               </div>
-              <Button
-                type="submit"
-                variant="chunky"
-                size="xl"
-                className="mt-1 w-full"
-              >
-                Find me
-              </Button>
-            </form>
-          </div>
 
-          <div className="flex shrink-0 justify-center">
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center justify-center px-4 py-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-            >
-              Back to home
-            </Link>
+              <div className="flex flex-col items-center gap-4 pt-1">
+                <Button
+                  type="submit"
+                  variant="chunky"
+                  size="xl"
+                  className="w-full"
+                >
+                  Find me
+                </Button>
+                <Link
+                  href="/"
+                  className="inline-flex min-h-11 items-center justify-center px-4 text-[15px] font-bold text-muted-foreground hover:text-foreground"
+                >
+                  Back to home
+                </Link>
+              </div>
+            </form>
           </div>
         </div>
       )}

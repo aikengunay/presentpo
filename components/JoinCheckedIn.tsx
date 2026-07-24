@@ -50,7 +50,7 @@ function ReceiptBody({
       </div>
 
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
           {pointsLine}
         </h1>
         {encourage ? (

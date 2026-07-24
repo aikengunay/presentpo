@@ -1,22 +1,13 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
-import { Figtree, Geist_Mono, Lora, Plus_Jakarta_Sans } from "next/font/google";
+import { Geist_Mono, Nunito } from "next/font/google";
 import "./globals.css";
 
-const figtree = Figtree({
+/** School-friendly display + UI (Duo-adjacent open substitute). */
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-figtree",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-plus-jakarta",
-});
-
-const lora = Lora({
-  subsets: ["latin"],
-  variable: "--font-lora",
+  variable: "--font-nunito",
 });
 
 const geistMono = Geist_Mono({
@@ -42,9 +33,7 @@ export default function RootLayout({
       lang="en"
       className={cn(
         "h-full antialiased font-sans",
-        figtree.variable,
-        plusJakartaSans.variable,
-        lora.variable,
+        nunito.variable,
         geistMono.variable,
       )}
     >

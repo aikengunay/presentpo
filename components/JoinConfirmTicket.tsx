@@ -107,13 +107,13 @@ export function JoinConfirmTicket({
   sectionCode,
   studentId,
   name,
-  subjectName,
   requireConfirm = false,
 }: {
   sectionCode: string;
   studentId: string;
   name: string;
-  subjectName: string;
+  /** Kept for join URL/callers; session meta comes from the token API. */
+  subjectName?: string;
   /** True after Find me — show confirm; don’t auto-skip to QR from storage. */
   requireConfirm?: boolean;
 }) {
@@ -197,19 +197,17 @@ export function JoinConfirmTicket({
 
     if (requireConfirm) {
       clearJoinTicket(sectionCode, studentId);
-      setResuming(false);
       // Drop fresh=1 so a later refresh can resume the ticket.
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has("fresh")) {
-          url.searchParams.delete("fresh");
-          window.history.replaceState(null, "", url.pathname + url.search);
-        }
+      // resuming already false via useState(!requireConfirm).
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("fresh")) {
+        url.searchParams.delete("fresh");
+        window.history.replaceState(null, "", url.pathname + url.search);
       }
       return;
     }
 
-    (async () => {
+    void (async () => {
       const stored = loadJoinTicket(sectionCode, studentId);
       if (!stored?.token) {
         if (!cancelled) setResuming(false);
@@ -324,7 +322,7 @@ export function JoinConfirmTicket({
     );
 
     return (
-      <div className="flex min-h-[calc(100svh-2rem)] w-full max-w-sm flex-col md:min-h-[calc(100svh-5rem)]">
+      <div className="flex min-h-[calc(100svh-2rem)] w-full max-w-sm flex-col gap-5 md:min-h-[calc(100svh-5rem)]">
         <div className="flex flex-1 flex-col items-center justify-center gap-5 py-4 sm:gap-8">
           {/* Context — quiet; never competes with QR / name */}
           <div className="space-y-1 text-center">
@@ -346,7 +344,7 @@ export function JoinConfirmTicket({
           {/* Identity — strongest text after the QR */}
           <div className="flex flex-col items-center gap-3 text-center">
             <div className="space-y-1">
-              <p className="text-lg font-semibold tracking-wide uppercase sm:text-xl">
+              <p className="text-lg font-extrabold tracking-wide uppercase sm:text-xl">
                 {ticket.name}
               </p>
               <p className="font-mono text-xs text-muted-foreground">
@@ -359,7 +357,7 @@ export function JoinConfirmTicket({
 
         <Link
           href="/join"
-          className="inline-flex min-h-11 shrink-0 items-center justify-center px-4 py-3 text-center text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline sm:self-center"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center px-4 text-center text-[15px] font-bold text-muted-foreground hover:text-foreground sm:self-center"
         >
           Cancel
         </Link>
@@ -383,14 +381,14 @@ export function JoinConfirmTicket({
           />
         </div>
 
-        <h1 className="font-heading text-xl font-medium tracking-tight text-foreground/80 sm:text-2xl">
+        <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           Is this you?
         </h1>
 
         <div className="w-full max-w-full space-y-2 px-1 text-center">
           <p
             className={cn(
-              "mx-auto max-w-full font-semibold uppercase leading-snug tracking-wide break-words hyphens-none",
+              "mx-auto max-w-full font-extrabold uppercase leading-snug tracking-wide break-words hyphens-none",
               identityScale.nameClass,
             )}
           >
@@ -410,7 +408,7 @@ export function JoinConfirmTicket({
           <p className="text-center text-sm text-destructive">{error}</p>
         ) : null}
 
-        <div className="flex w-full flex-col items-center gap-1 pt-2">
+        <div className="flex w-full flex-col items-center gap-4 pt-2">
           <Button
             variant="chunky"
             size="xl"
@@ -422,7 +420,7 @@ export function JoinConfirmTicket({
           </Button>
           <Link
             href={`/join?sectionCode=${encodeURIComponent(sectionCode)}&studentId=${encodeURIComponent(studentId)}`}
-            className="inline-flex min-h-11 items-center justify-center px-4 py-3 text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            className="inline-flex min-h-11 items-center justify-center px-4 text-[15px] font-bold text-muted-foreground hover:text-foreground"
           >
             Not me
           </Link>

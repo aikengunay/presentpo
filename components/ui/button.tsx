@@ -20,7 +20,10 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         /** School-friendly 3D lip — squircle 12px, PresentPo sky */
         chunky:
-          "presentpo-btn-chunky rounded-[12px] border-0 bg-primary text-base font-semibold text-primary-foreground hover:bg-primary focus-visible:ring-primary/40 active:translate-y-0 disabled:opacity-50",
+          "presentpo-btn-chunky rounded-[12px] border-0 bg-primary text-base font-bold tracking-normal text-primary-foreground hover:bg-primary focus-visible:ring-primary/40 active:translate-y-0 disabled:opacity-50",
+        /** White + grey border lip — real second button; keep ghost for text escapes */
+        chunkySecondary:
+          "presentpo-btn-chunky-secondary rounded-[12px] border-2 border-border bg-background text-base font-bold tracking-normal text-primary hover:bg-muted focus-visible:ring-primary/30 active:translate-y-0 disabled:opacity-50",
       },
       size: {
         default:

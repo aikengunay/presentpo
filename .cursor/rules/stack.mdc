@@ -9,7 +9,7 @@ alwaysApply: false
 - **Next.js App Router** + TypeScript
 - **Prisma 7** + **PostgreSQL** via `@prisma/adapter-pg` + `pg` (`lib/db.ts`)
 - Generated client: `lib/generated/prisma` (gitignored; `prisma generate` / postinstall)
-- **UI:** shadcn/ui **base-vega** — neutral surfaces, **sky** theme, Figtree + Lora, medium radius; teacher shell under `components/teacher/`
+- **UI:** shadcn/ui **base-vega** — neutral surfaces, **sky** theme, **Nunito** (sans/brand/heading) + Geist Mono, ~12px squircle on join chunky controls; teacher shell under `components/teacher/`
 - **Production:** `https://presentpo.com` — Cloudflare DNS → always-on host (see `docs/deploy-presentpo.md`)
 - Local DB: `docker compose up -d db` with URL in `.env.example`
 - Domain logic in `lib/`; API under `app/api/`
