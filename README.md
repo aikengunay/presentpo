@@ -21,7 +21,7 @@ npm run dev
 ```
 
 - App: `http://localhost:3000`
-- Teacher: `/teacher` → password (add passkey from Security panel)
+- Teacher: `/teacher` → password / passkey (shadcn **base-vega** + sky theme; add passkey from Security)
 - Students (eventually): `/join` on **https://presentpo.com**
 
 Deploy: [`docs/deploy-presentpo.md`](docs/deploy-presentpo.md).

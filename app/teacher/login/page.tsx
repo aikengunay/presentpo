@@ -1,5 +1,16 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   authenticateTeacherPasskey,
   canAutoPasskey,
@@ -64,7 +75,6 @@ function LoginForm() {
         if (!cancelled) goNext();
       } catch (err) {
         if (cancelled) return;
-        // Cancel / dismiss → stay on password form quietly
         if (err instanceof Error && err.name === "NotAllowedError") return;
         setError(err instanceof Error ? err.message : "Passkey sign-in failed");
       } finally {
@@ -119,8 +129,8 @@ function LoginForm() {
   const showPasskey = statusLoaded && hasPasskeys;
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50 text-zinc-900">
-      <header className="border-b border-zinc-200 bg-white">
+    <div className="flex min-h-svh flex-col bg-muted">
+      <header className="border-b bg-background">
         <div className="mx-auto flex h-14 max-w-6xl items-center px-4 sm:px-6 lg:px-8">
           <Link href="/" className="text-sm font-semibold tracking-tight">
             presentpo
@@ -129,74 +139,76 @@ function LoginForm() {
       </header>
 
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
-        <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Sign in to presentpo
-            </h1>
-            <p className="mt-2 text-sm text-zinc-600">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl">Sign in to presentpo</CardTitle>
+            <CardDescription>
               {showPasskey
                 ? passkeyLoading
                   ? "Waiting for passkey…"
                   : "Use your passkey, or cancel and enter your password."
                 : "Teacher access for attendance sessions."}
-            </p>
-          </div>
-
-          <form onSubmit={onSubmit} className="mt-8 flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-zinc-700" htmlFor="password">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-2.5 text-base outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200"
-                required
-              />
-            </div>
-
-            {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-            <button
-              type="submit"
-              disabled={loading || passkeyLoading}
-              className="rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
-            >
-              {loading ? "Signing in…" : "Continue"}
-            </button>
-          </form>
-
-          {showPasskey ? (
-            <>
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center" aria-hidden>
-                  <div className="w-full border-t border-zinc-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase tracking-wide">
-                  <span className="bg-white px-3 text-zinc-500">or</span>
-                </div>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={() => void signInWithPasskey()}
-                disabled={passkeyLoading || loading}
-                className="w-full rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-900 disabled:opacity-60"
+              {error ? (
+                <p className="text-sm text-destructive">{error}</p>
+              ) : null}
+
+              <Button
+                type="submit"
+                size="lg"
+                disabled={loading || passkeyLoading}
+                className="w-full"
               >
-                {passkeyLoading ? "Waiting for passkey…" : "Sign in with passkey"}
-              </button>
-            </>
-          ) : statusLoaded ? (
-            <p className="mt-6 text-center text-xs text-zinc-500">
-              First time here? After you continue, we’ll offer to set up a passkey.
-            </p>
-          ) : null}
-        </div>
+                {loading ? "Signing in…" : "Continue"}
+              </Button>
+            </form>
+
+            {showPasskey ? (
+              <>
+                <div className="relative my-6">
+                  <Separator />
+                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs uppercase tracking-wide text-muted-foreground">
+                    or
+                  </span>
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => void signInWithPasskey()}
+                  disabled={passkeyLoading || loading}
+                >
+                  {passkeyLoading
+                    ? "Waiting for passkey…"
+                    : "Sign in with passkey"}
+                </Button>
+              </>
+            ) : statusLoaded ? (
+              <p className="mt-6 text-center text-xs text-muted-foreground">
+                First time here? After you continue, we’ll offer to set up a
+                passkey.
+              </p>
+            ) : null}
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
@@ -206,7 +218,7 @@ export default function TeacherLoginPage() {
   return (
     <Suspense
       fallback={
-        <p className="flex min-h-screen items-center justify-center bg-zinc-50 text-sm text-zinc-500">
+        <p className="flex min-h-svh items-center justify-center bg-muted text-sm text-muted-foreground">
           Loading…
         </p>
       }

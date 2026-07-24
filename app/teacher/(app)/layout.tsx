@@ -1,5 +1,6 @@
-import { LogoutButton } from "@/components/LogoutButton";
-import Link from "next/link";
+import { TeacherAppSidebar } from "@/components/teacher/app-sidebar";
+import { TeacherSiteHeader } from "@/components/teacher/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function TeacherAppLayout({
   children,
@@ -7,36 +8,25 @@ export default function TeacherAppLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900">
-      <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/teacher"
-            className="text-sm font-semibold tracking-tight text-zinc-900"
-          >
-            presentpo
-          </Link>
-          <nav className="flex items-center gap-1 text-sm text-zinc-600 sm:gap-2">
-            <Link
-              href="/teacher"
-              className="rounded-md px-2.5 py-1.5 hover:bg-zinc-100 hover:text-zinc-900"
-            >
-              Sections
-            </Link>
-            <Link
-              href="/teacher/import"
-              className="rounded-md px-2.5 py-1.5 hover:bg-zinc-100 hover:text-zinc-900"
-            >
-              Import
-            </Link>
-            <span className="mx-1 hidden h-4 w-px bg-zinc-200 sm:block" aria-hidden />
-            <LogoutButton />
-          </nav>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 64)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <TeacherAppSidebar variant="inset" />
+      <SidebarInset>
+        <TeacherSiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 px-4 py-4 md:gap-6 md:px-6 md:py-6">
+              {children}
+            </div>
+          </div>
         </div>
-      </header>
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        {children}
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

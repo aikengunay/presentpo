@@ -1,5 +1,21 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { enrollTeacherPasskey } from "@/lib/passkey-client";
 import { useCallback, useEffect, useState } from "react";
 
@@ -70,14 +86,18 @@ export function PasskeySecurityPanel({
       await enrollTeacherPasskey();
       await load();
       setShowOffer(false);
-      setSuccess("Passkey enrolled. Next visit you can sign in with it from the login page.");
+      setSuccess(
+        "Passkey enrolled. Next visit you can sign in with it from the login page.",
+      );
     } catch (err) {
       if (err instanceof Error && err.name === "NotAllowedError") {
         setError(
           "Cancelled or blocked. Stay on http://localhost:3000 (not 127.0.0.1) and try again.",
         );
       } else {
-        setError(err instanceof Error ? err.message : "Passkey registration failed");
+        setError(
+          err instanceof Error ? err.message : "Passkey registration failed",
+        );
       }
     } finally {
       setBusy(false);
@@ -114,124 +134,124 @@ export function PasskeySecurityPanel({
 
   if (support === "checking") {
     return (
-      <section className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
-        <h2 className="text-sm font-semibold tracking-tight">Security</h2>
-        <p className="mt-1 text-sm text-zinc-500">Checking passkey support…</p>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Security</CardTitle>
+          <CardDescription>Checking passkey support…</CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
   if (support === "no") {
     return (
-      <section className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
-        <h2 className="text-sm font-semibold tracking-tight">Security</h2>
-        <p className="mt-1 text-sm text-zinc-600">
-          This browser does not expose WebAuthn. Try Chrome or Safari, or keep using
-          password.
-        </p>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Security</CardTitle>
+          <CardDescription>
+            This browser does not expose WebAuthn. Try Chrome or Safari, or keep
+            using password.
+          </CardDescription>
+        </CardHeader>
+      </Card>
     );
   }
 
   return (
     <>
-      {showOffer ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 p-4">
-          <div
-            role="dialog"
-            aria-labelledby="passkey-offer-title"
-            className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-6 shadow-lg"
-          >
-            <h2
-              id="passkey-offer-title"
-              className="text-lg font-semibold tracking-tight text-zinc-900"
+      <Dialog
+        open={showOffer}
+        onOpenChange={(open) => {
+          if (!open) dismissOffer();
+        }}
+      >
+        <DialogContent className="sm:max-w-md" showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>Set up a passkey?</DialogTitle>
+            <DialogDescription>
+              Next time you can unlock with Face ID / Touch ID from the login
+              page — password stays as a backup.
+            </DialogDescription>
+          </DialogHeader>
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={dismissOffer}
+              disabled={busy}
             >
-              Set up a passkey?
-            </h2>
-            <p className="mt-2 text-sm text-zinc-600">
-              Next time you can unlock with Face ID / Touch ID from the login page — password
-              stays as a backup.
-            </p>
-            {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={dismissOffer}
-                disabled={busy}
-                className="rounded-md px-4 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100 disabled:opacity-60"
-              >
-                Not now
-              </button>
-              <button
-                type="button"
-                onClick={addPasskey}
-                disabled={busy}
-                className="rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white disabled:opacity-60"
-              >
-                {busy ? "Waiting for device…" : "Set up passkey"}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+              Not now
+            </Button>
+            <Button type="button" onClick={addPasskey} disabled={busy}>
+              {busy ? "Waiting for device…" : "Set up passkey"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      <section className="rounded-xl border border-zinc-200 bg-white px-4 py-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-sm font-semibold tracking-tight">Security · Passkeys</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Manage devices that can unlock teacher access. Password always remains a
-              backup. If passkey sign-in fails, remove old keys and add a new one.
-            </p>
+      <Card>
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1.5">
+            <CardTitle>Security · Passkeys</CardTitle>
+            <CardDescription>
+              Manage devices that can unlock teacher access. Password always
+              remains a backup. If passkey sign-in fails, remove old keys and
+              add a new one.
+            </CardDescription>
           </div>
-          <button
+          <Button
             type="button"
             onClick={addPasskey}
             disabled={busy}
-            className="shrink-0 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+            className="shrink-0"
           >
             {busy ? "Waiting…" : "Add passkey"}
-          </button>
-        </div>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {error && !showOffer ? (
+            <p className="mb-3 text-sm text-destructive">{error}</p>
+          ) : null}
+          {success ? (
+            <p className="mb-3 text-sm text-emerald-700">{success}</p>
+          ) : null}
 
-        {error && !showOffer ? (
-          <p className="mt-3 text-sm text-red-600">{error}</p>
-        ) : null}
-        {success ? <p className="mt-3 text-sm text-emerald-700">{success}</p> : null}
-
-        {passkeys.length === 0 ? (
-          <p className="mt-3 rounded-md border border-dashed border-zinc-300 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
-            No passkeys yet.
-          </p>
-        ) : (
-          <ul className="mt-3 divide-y divide-zinc-100 rounded-md border border-zinc-200">
-            {passkeys.map((p) => (
-              <li
-                key={p.id}
-                className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
-              >
-                <div>
-                  <p className="font-medium text-zinc-900">
-                    {p.label || p.deviceType || "Passkey"}
-                    {p.backedUp ? " · synced" : ""}
-                  </p>
-                  <p className="text-xs text-zinc-500">
-                    Added {new Date(p.createdAt).toLocaleString()}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removePasskey(p.id)}
-                  disabled={busy}
-                  className="text-sm text-red-700 underline disabled:opacity-60"
+          {passkeys.length === 0 ? (
+            <p className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+              No passkeys yet.
+            </p>
+          ) : (
+            <ul className="divide-y rounded-lg border">
+              {passkeys.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
                 >
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+                  <div>
+                    <p className="font-medium">
+                      {p.label || p.deviceType || "Passkey"}
+                      {p.backedUp ? " · synced" : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Added {new Date(p.createdAt).toLocaleString()}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-destructive"
+                    onClick={() => removePasskey(p.id)}
+                    disabled={busy}
+                  >
+                    Remove
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }
