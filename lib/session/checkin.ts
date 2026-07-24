@@ -1,7 +1,8 @@
-import { randomBytes } from "node:crypto";
 import type { PrismaClient } from "@/lib/generated/prisma/client";
+import { studentStatusFor } from "@/lib/attendance-copy";
 import { scoreCheckIn } from "@/lib/scoring";
 import { personalTokenTtlSeconds } from "@/lib/time";
+import { randomBytes } from "node:crypto";
 
 export type CheckInSuccess = {
   code: 1 | 2 | 3 | 4;
@@ -13,12 +14,9 @@ export type CheckInSuccess = {
   sessionId: string;
 };
 
-const CODE_LABELS: Record<1 | 2 | 3 | 4, string> = {
-  1: "Present / on time (or under 15 min late)",
-  2: "Late 15–30 min",
-  3: "Late 30–60 min",
-  4: "Late 60+ min",
-};
+function labelFor(code: 1 | 2 | 3 | 4): string {
+  return studentStatusFor(code).detail;
+}
 
 export function newCheckInTokenValue(): string {
   return randomBytes(9).toString("base64url");
@@ -190,7 +188,7 @@ export async function getPersonalCheckInStatus(
       checkedIn: true as const,
       valid: true as const,
       code,
-      label: CODE_LABELS[code],
+      label: labelFor(code),
       name: row.student.name,
       studentId: row.student.studentId,
       sectionCode: row.session.meeting.section.code,
@@ -302,7 +300,7 @@ export async function performTeacherScan(
     studentId: row.student.studentId,
     sectionCode: row.session.meeting.section.code,
     checkedInAt: now.toISOString(),
-    label: CODE_LABELS[score],
+    label: labelFor(score),
     sessionId: row.sessionId,
   };
 }

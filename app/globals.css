@@ -166,9 +166,46 @@
   animation: presentpo-qr-ring 2.4s ease-out infinite;
 }
 
+/* One-shot success check on /join/done — not a waiting pulse */
+@keyframes presentpo-check-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.65);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes presentpo-check-ring {
+  0% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+.presentpo-check-pop {
+  animation: presentpo-check-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.presentpo-check-ring {
+  animation: presentpo-check-ring 0.7s ease-out both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .presentpo-qr-tile,
-  .presentpo-qr-ring {
+  .presentpo-qr-ring,
+  .presentpo-check-pop,
+  .presentpo-check-ring {
     animation: none;
   }
 }
