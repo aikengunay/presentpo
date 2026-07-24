@@ -9,8 +9,8 @@ function titleForPath(pathname: string): string {
   if (pathname.startsWith("/teacher/import")) return "Import";
   if (pathname.startsWith("/teacher/sections")) return "Section";
   if (pathname.includes("/roster")) return "Roster";
-  if (pathname.includes("/projector") || pathname.includes("/board")) {
-    return "Presence";
+  if (pathname.includes("/scan") || pathname.includes("/projector") || pathname.includes("/board")) {
+    return "Station";
   }
   if (pathname.includes("/export")) return "Export";
   if (pathname.includes("/sessions")) return "Session";

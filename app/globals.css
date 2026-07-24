@@ -129,3 +129,46 @@
     @apply font-sans;
   }
 }
+
+/* Soft waiting pulse around the student check-in QR tile */
+@keyframes presentpo-qr-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 oklch(0.685 0.169 237.323 / 0.35),
+      0 8px 24px oklch(0 0 0 / 0.08);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 12px oklch(0.685 0.169 237.323 / 0),
+      0 8px 28px oklch(0 0 0 / 0.1);
+    transform: scale(1.015);
+  }
+}
+
+@keyframes presentpo-qr-ring {
+  0% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}
+
+.presentpo-qr-tile {
+  animation: presentpo-qr-pulse 2.4s ease-in-out infinite;
+}
+
+.presentpo-qr-ring {
+  animation: presentpo-qr-ring 2.4s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presentpo-qr-tile,
+  .presentpo-qr-ring {
+    animation: none;
+  }
+}

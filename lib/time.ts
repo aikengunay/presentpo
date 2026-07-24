@@ -15,6 +15,12 @@ export function qrRotateSeconds(): number {
   return Number.isFinite(n) && n >= 5 ? n : 20;
 }
 
+/** Personal student QR TTL (seconds). Default 10 minutes. */
+export function personalTokenTtlSeconds(): number {
+  const n = Number(process.env.PERSONAL_TOKEN_TTL_SECONDS ?? 600);
+  return Number.isFinite(n) && n >= 60 ? n : 600;
+}
+
 export function earlyCheckInMinutes(): number {
   const n = Number(process.env.EARLY_CHECKIN_MINUTES ?? 15);
   return Number.isFinite(n) && n >= 0 ? n : 15;

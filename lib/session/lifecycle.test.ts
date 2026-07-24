@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
 import { scoreCheckIn } from "@/lib/scoring";
-import { performCheckIn } from "./checkin";
-import { endSession, ensureCurrentQrToken, startSession } from "./lifecycle";
+import { issuePersonalToken, performTeacherScan } from "./checkin";
+import { endSession, startSession } from "./lifecycle";
 
 describe("session lifecycle", () => {
   let sectionId: string;
@@ -41,7 +41,7 @@ describe("session lifecycle", () => {
     studentB = section.students[1]!;
   });
 
-  it("starts session, scores check-in, ends with auto-absent 0", async () => {
+  it("starts session, teacher-scans personal QR, ends with auto-absent 0", async () => {
     const started = await startSession(prisma, {
       sectionId,
       templateId,
@@ -49,12 +49,16 @@ describe("session lifecycle", () => {
     });
     expect(started.session.status).toBe("open");
 
-    const qr = await ensureCurrentQrToken(prisma, started.session.id);
-    const result = await performCheckIn(prisma, {
-      studentId: studentA.studentId,
-      sectionCode: "TESTM4",
-      token: qr.token,
-    });
+    const personal = await issuePersonalToken(
+      prisma,
+      "TESTM4",
+      studentA.studentId,
+    );
+    const result = await performTeacherScan(
+      prisma,
+      started.session.id,
+      personal.token,
+    );
     expect(result.code).toBe(1);
 
     const t0 = started.session.t0;

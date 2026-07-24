@@ -44,13 +44,13 @@ export function StartSessionPanel({
       const data = await res.json();
       if (!res.ok) {
         if (data.sessionId) {
-          router.push(`/teacher/sessions/${data.sessionId}/projector`);
+          router.push(`/teacher/sessions/${data.sessionId}/scan`);
           return;
         }
         setError(data.message || "Could not start session");
         return;
       }
-      router.push(`/teacher/sessions/${data.sessionId}/projector`);
+      router.push(`/teacher/sessions/${data.sessionId}/scan`);
       router.refresh();
     } finally {
       setLoading(false);
@@ -82,10 +82,10 @@ export function StartSessionPanel({
         <p className="text-sm font-medium text-emerald-900">Session open</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <a
-            href={`/teacher/sessions/${openSessionId}/projector`}
+            href={`/teacher/sessions/${openSessionId}/scan`}
             className="rounded bg-zinc-900 px-3 py-2 text-sm font-medium text-white"
           >
-            Open projector QR
+            Station Scan
           </a>
           <a
             href={`/teacher/sessions/${openSessionId}/roster`}
@@ -113,7 +113,8 @@ export function StartSessionPanel({
       className="flex flex-col gap-3 rounded border border-zinc-200 bg-white p-4"
     >
       <p className="text-sm text-zinc-600">
-        Start a capture session for today. Students scan the rotating QR.
+        Start a capture session for today. Students open /join and show their
+        personal QR at the station.
       </p>
       {templates.length > 0 ? (
         <label className="flex flex-col gap-1 text-sm">

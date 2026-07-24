@@ -1,10 +1,8 @@
-import { randomBytes } from "node:crypto";
 import type { PrismaClient } from "@/lib/generated/prisma/client";
 import {
   earlyCheckInMinutes,
   manilaDateString,
   manilaDateTime,
-  qrRotateSeconds,
 } from "@/lib/time";
 
 export type StartSessionInput = {
@@ -14,10 +12,6 @@ export type StartSessionInput = {
   t0Mode: "scheduled" | "now";
   title?: string | null;
 };
-
-export function newQrTokenValue(): string {
-  return randomBytes(6).toString("base64url");
-}
 
 export async function startSession(prisma: PrismaClient, input: StartSessionInput) {
   const section = await prisma.section.findUnique({
@@ -120,17 +114,8 @@ export async function startSession(prisma: PrismaClient, input: StartSessionInpu
       },
     });
 
-    const expiresAt = new Date(Date.now() + qrRotateSeconds() * 1000);
-    const qr = await tx.qrToken.create({
-      data: {
-        sessionId: session.id,
-        token: newQrTokenValue(),
-        expiresAt,
-      },
-    });
-
     const meeting = await tx.meeting.findUniqueOrThrow({ where: { id: meetingId } });
-    return { session, meeting, section, qr };
+    return { session, meeting, section };
   });
 }
 
@@ -175,30 +160,4 @@ export async function endSession(prisma: PrismaClient, sessionId: string) {
 
   const updated = await prisma.session.findUniqueOrThrow({ where: { id: sessionId } });
   return { session: updated, markedAbsent: missing.length };
-}
-
-export async function ensureCurrentQrToken(
-  prisma: PrismaClient,
-  sessionId: string,
-) {
-  const session = await prisma.session.findUnique({ where: { id: sessionId } });
-  if (!session) throw Object.assign(new Error("Session not found"), { code: "NOT_FOUND" });
-  if (session.status !== "open") {
-    throw Object.assign(new Error("Session is closed"), { code: "SESSION_CLOSED" });
-  }
-
-  const now = new Date();
-  const current = await prisma.qrToken.findFirst({
-    where: { sessionId, expiresAt: { gt: now } },
-    orderBy: { createdAt: "desc" },
-  });
-  if (current) return current;
-
-  return prisma.qrToken.create({
-    data: {
-      sessionId,
-      token: newQrTokenValue(),
-      expiresAt: new Date(Date.now() + qrRotateSeconds() * 1000),
-    },
-  });
 }

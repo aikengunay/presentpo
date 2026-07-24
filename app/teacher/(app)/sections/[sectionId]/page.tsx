@@ -129,10 +129,10 @@ export default async function SectionDetailPage({ params }: Props) {
                         <>
                           {" · "}
                           <Link
-                            href={`/teacher/sessions/${m.session.id}/projector`}
+                            href={`/teacher/sessions/${m.session.id}/scan`}
                             className="underline"
                           >
-                            projector
+                            scan
                           </Link>
                         </>
                       ) : null}

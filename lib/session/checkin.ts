@@ -1,11 +1,7 @@
+import { randomBytes } from "node:crypto";
 import type { PrismaClient } from "@/lib/generated/prisma/client";
 import { scoreCheckIn } from "@/lib/scoring";
-
-export type CheckInInput = {
-  studentId: string;
-  sectionCode: string;
-  token: string;
-};
+import { personalTokenTtlSeconds } from "@/lib/time";
 
 export type CheckInSuccess = {
   code: 1 | 2 | 3 | 4;
@@ -14,6 +10,7 @@ export type CheckInSuccess = {
   sectionCode: string;
   checkedInAt: string;
   label: string;
+  sessionId: string;
 };
 
 const CODE_LABELS: Record<1 | 2 | 3 | 4, string> = {
@@ -23,94 +20,8 @@ const CODE_LABELS: Record<1 | 2 | 3 | 4, string> = {
   4: "Late 60+ min",
 };
 
-export async function performCheckIn(
-  prisma: PrismaClient,
-  input: CheckInInput,
-): Promise<CheckInSuccess> {
-  const studentId = input.studentId.trim();
-  const sectionCode = input.sectionCode.trim().toUpperCase();
-  const token = input.token.trim();
-
-  if (!studentId || !sectionCode || !token) {
-    throw Object.assign(new Error("studentId, sectionCode, and token are required"), {
-      code: "BAD_REQUEST",
-    });
-  }
-
-  const now = new Date();
-  const qr = await prisma.qrToken.findUnique({
-    where: { token },
-    include: {
-      session: {
-        include: {
-          meeting: { include: { section: true } },
-        },
-      },
-    },
-  });
-
-  if (!qr || qr.expiresAt <= now) {
-    throw Object.assign(new Error("QR token expired or invalid"), { code: "TOKEN_EXPIRED" });
-  }
-  if (qr.session.status !== "open") {
-    throw Object.assign(new Error("Session is closed"), { code: "SESSION_CLOSED" });
-  }
-  if (qr.session.meeting.section.code.toUpperCase() !== sectionCode) {
-    throw Object.assign(new Error("Token is for a different section"), {
-      code: "NOT_IN_SECTION",
-    });
-  }
-
-  const student = await prisma.student.findFirst({
-    where: {
-      sectionId: qr.session.meeting.sectionId,
-      studentId,
-      active: true,
-    },
-  });
-  if (!student) {
-    throw Object.assign(new Error("Student not in this section"), { code: "NOT_IN_SECTION" });
-  }
-
-  const existing = await prisma.attendance.findUnique({
-    where: {
-      sessionId_studentId: { sessionId: qr.sessionId, studentId: student.id },
-    },
-  });
-  if (existing) {
-    throw Object.assign(new Error("Already checked in for this session"), {
-      code: "ALREADY_CHECKED_IN",
-      codeMark: existing.code,
-    });
-  }
-
-  const score = scoreCheckIn({
-    t0: qr.session.t0,
-    checkedInAt: now,
-    earlyMinutes: qr.session.earlyMinutes,
-  });
-  if (score === "too_early") {
-    throw Object.assign(new Error("Too early to check in"), { code: "TOO_EARLY" });
-  }
-
-  await prisma.attendance.create({
-    data: {
-      sessionId: qr.sessionId,
-      studentId: student.id,
-      code: score,
-      source: "qr",
-      checkedInAt: now,
-    },
-  });
-
-  return {
-    code: score,
-    name: student.name,
-    studentId: student.studentId,
-    sectionCode: qr.session.meeting.section.code,
-    checkedInAt: now.toISOString(),
-    label: CODE_LABELS[score],
-  };
+export function newCheckInTokenValue(): string {
+  return randomBytes(9).toString("base64url");
 }
 
 export async function lookupStudent(
@@ -130,9 +41,268 @@ export async function lookupStudent(
       active: true,
     },
     select: {
+      id: true,
       studentId: true,
       name: true,
-      section: { select: { code: true, subjectName: true } },
+      section: {
+        select: {
+          id: true,
+          code: true,
+          subjectName: true,
+          termLabel: true,
+        },
+      },
     },
   });
+}
+
+export type IssuePersonalTokenResult = {
+  token: string;
+  expiresAt: string;
+  sessionId: string;
+  name: string;
+  studentId: string;
+  sectionCode: string;
+  subjectName: string;
+  termLabel: string;
+  meetingStartAt: string;
+  meetingEndAt: string;
+  room: string | null;
+};
+
+/** Issue (or refresh) a personal QR token for the open session of this section. */
+export async function issuePersonalToken(
+  prisma: PrismaClient,
+  sectionCode: string,
+  studentIdRaw: string,
+): Promise<IssuePersonalTokenResult> {
+  const student = await lookupStudent(prisma, sectionCode, studentIdRaw);
+  if (!student) {
+    throw Object.assign(new Error("Student not found in section"), {
+      code: "NOT_IN_SECTION",
+    });
+  }
+
+  const session = await prisma.session.findFirst({
+    where: {
+      status: "open",
+      meeting: { sectionId: student.section.id },
+    },
+    include: {
+      meeting: {
+        include: { template: true, section: true },
+      },
+    },
+  });
+  if (!session) {
+    throw Object.assign(new Error("No open session for this section"), {
+      code: "SESSION_CLOSED",
+    });
+  }
+
+  const existingAttendance = await prisma.attendance.findUnique({
+    where: {
+      sessionId_studentId: {
+        sessionId: session.id,
+        studentId: student.id,
+      },
+    },
+  });
+  if (existingAttendance && existingAttendance.code > 0) {
+    throw Object.assign(new Error("Already checked in for this session"), {
+      code: "ALREADY_CHECKED_IN",
+      codeMark: existingAttendance.code,
+    });
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + personalTokenTtlSeconds() * 1000);
+  const token = newCheckInTokenValue();
+
+  // Invalidate prior unused tokens for this student/session
+  await prisma.checkInToken.deleteMany({
+    where: {
+      sessionId: session.id,
+      studentId: student.id,
+      consumedAt: null,
+    },
+  });
+
+  await prisma.checkInToken.create({
+    data: {
+      sessionId: session.id,
+      studentId: student.id,
+      token,
+      expiresAt,
+    },
+  });
+
+  const room =
+    session.meeting.template?.room ??
+    session.meeting.template?.roomType ??
+    session.meeting.title;
+
+  return {
+    token,
+    expiresAt: expiresAt.toISOString(),
+    sessionId: session.id,
+    name: student.name,
+    studentId: student.studentId,
+    sectionCode: student.section.code,
+    subjectName: student.section.subjectName,
+    termLabel: student.section.termLabel,
+    meetingStartAt: session.meeting.startAt.toISOString(),
+    meetingEndAt: session.meeting.endAt.toISOString(),
+    room,
+  };
+}
+
+export async function getPersonalCheckInStatus(
+  prisma: PrismaClient,
+  token: string,
+) {
+  const row = await prisma.checkInToken.findUnique({
+    where: { token: token.trim() },
+    include: {
+      student: true,
+      session: {
+        include: {
+          meeting: { include: { section: true } },
+        },
+      },
+    },
+  });
+  if (!row) {
+    return { checkedIn: false as const, valid: false as const };
+  }
+
+  const attendance = await prisma.attendance.findUnique({
+    where: {
+      sessionId_studentId: {
+        sessionId: row.sessionId,
+        studentId: row.studentId,
+      },
+    },
+  });
+  if (attendance && attendance.code > 0) {
+    const code = attendance.code as 1 | 2 | 3 | 4;
+    return {
+      checkedIn: true as const,
+      valid: true as const,
+      code,
+      label: CODE_LABELS[code],
+      name: row.student.name,
+      studentId: row.student.studentId,
+      sectionCode: row.session.meeting.section.code,
+    };
+  }
+
+  const expired = row.expiresAt <= new Date();
+  return {
+    checkedIn: false as const,
+    valid: !expired && !row.consumedAt,
+    expired,
+  };
+}
+
+/** Teacher station: scan personal token and mark attendance. */
+export async function performTeacherScan(
+  prisma: PrismaClient,
+  sessionId: string,
+  tokenRaw: string,
+): Promise<CheckInSuccess> {
+  const token = tokenRaw.trim();
+  if (!token) {
+    throw Object.assign(new Error("token is required"), { code: "BAD_REQUEST" });
+  }
+
+  const now = new Date();
+  const row = await prisma.checkInToken.findUnique({
+    where: { token },
+    include: {
+      student: true,
+      session: {
+        include: {
+          meeting: { include: { section: true } },
+        },
+      },
+    },
+  });
+
+  if (!row || row.expiresAt <= now) {
+    throw Object.assign(new Error("QR token expired or invalid"), {
+      code: "TOKEN_EXPIRED",
+    });
+  }
+  if (row.sessionId !== sessionId) {
+    throw Object.assign(new Error("Token is for a different session"), {
+      code: "INVALID_TOKEN",
+    });
+  }
+  if (row.session.status !== "open") {
+    throw Object.assign(new Error("Session is closed"), {
+      code: "SESSION_CLOSED",
+    });
+  }
+
+  const existing = await prisma.attendance.findUnique({
+    where: {
+      sessionId_studentId: {
+        sessionId: row.sessionId,
+        studentId: row.studentId,
+      },
+    },
+  });
+  if (existing && existing.code > 0) {
+    throw Object.assign(new Error("Already checked in for this session"), {
+      code: "ALREADY_CHECKED_IN",
+      codeMark: existing.code,
+    });
+  }
+
+  const score = scoreCheckIn({
+    t0: row.session.t0,
+    checkedInAt: now,
+    earlyMinutes: row.session.earlyMinutes,
+  });
+  if (score === "too_early") {
+    throw Object.assign(new Error("Too early to check in"), { code: "TOO_EARLY" });
+  }
+
+  await prisma.$transaction(async (tx) => {
+    if (existing) {
+      await tx.attendance.update({
+        where: { id: existing.id },
+        data: {
+          code: score,
+          source: "teacher_scan",
+          checkedInAt: now,
+        },
+      });
+    } else {
+      await tx.attendance.create({
+        data: {
+          sessionId: row.sessionId,
+          studentId: row.studentId,
+          code: score,
+          source: "teacher_scan",
+          checkedInAt: now,
+        },
+      });
+    }
+    await tx.checkInToken.update({
+      where: { id: row.id },
+      data: { consumedAt: now },
+    });
+  });
+
+  return {
+    code: score,
+    name: row.student.name,
+    studentId: row.student.studentId,
+    sectionCode: row.session.meeting.section.code,
+    checkedInAt: now.toISOString(),
+    label: CODE_LABELS[score],
+    sessionId: row.sessionId,
+  };
 }

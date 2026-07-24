@@ -41,8 +41,6 @@ export async function POST(req: Request) {
       sectionCode: result.section.code,
       t0: result.session.t0.toISOString(),
       status: result.session.status,
-      token: result.qr.token,
-      expiresAt: result.qr.expiresAt.toISOString(),
     });
   } catch (err) {
     const code = (err as { code?: string }).code;

@@ -16,6 +16,7 @@ enum SessionStatus {
 
 enum AttendanceSource {
   qr
+  teacher_scan
   manual
   auto
 }
@@ -42,8 +43,9 @@ model Student {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  section     Section      @relation(fields: [sectionId], references: [id], onDelete: Cascade)
-  attendances Attendance[]
+  section       Section        @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  attendances   Attendance[]
+  checkInTokens CheckInToken[]
 
   @@unique([sectionId, studentId])
   @@index([sectionId])
@@ -92,8 +94,9 @@ model Session {
   earlyMinutes   Int           @default(15)
   autoAbsentDone Boolean       @default(false)
 
-  meeting     Meeting      @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  meeting     Meeting         @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   qrTokens    QrToken[]
+  checkInTokens CheckInToken[]
   attendances Attendance[]
 }
 
@@ -124,6 +127,23 @@ model QrToken {
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId, expiresAt])
+}
+
+/// Short-lived personal token shown as QR on student phone; teacher station scans it.
+model CheckInToken {
+  id        String   @id @default(cuid())
+  sessionId String
+  studentId String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  consumedAt DateTime?
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, studentId])
+  @@index([expiresAt])
 }
 
 /// WebAuthn credentials for the single teacher account.

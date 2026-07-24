@@ -35,8 +35,21 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+function getPrisma(): PrismaClient {
+  const existing = globalForPrisma.prisma;
+  // After schema changes, a hot-reloaded process can keep a stale client
+  // without new delegates (e.g. checkInToken). Recreate in that case.
+  const delegate = (
+    existing as { checkInToken?: { deleteMany?: unknown } } | undefined
+  )?.checkInToken;
+  if (existing && typeof delegate?.deleteMany === "function") {
+    return existing;
+  }
+  const client = createPrismaClient();
+  if (process.env.NODE_ENV !== "production") {
+    globalForPrisma.prisma = client;
+  }
+  return client;
 }
+
+export const prisma = getPrisma();

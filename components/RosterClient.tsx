@@ -175,10 +175,10 @@ export function RosterClient({ sessionId }: { sessionId: string }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
-            href={`/teacher/sessions/${sessionId}/projector`}
+            href={`/teacher/sessions/${sessionId}/scan`}
             className="rounded border border-zinc-300 bg-white px-3 py-2 text-sm"
           >
-            Projector
+            Station Scan
           </Link>
           {feed?.status === "open" ? (
             <button

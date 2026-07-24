@@ -1,5 +1,14 @@
 "use client";
 
+import { BrandLockup } from "@/components/teacher/brand-lockup";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -11,15 +20,27 @@ function DoneBody() {
   const name = search.get("name") ?? "";
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-6">
-      <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Checked in</p>
-      <h1 className="text-3xl font-semibold tracking-tight">Code {code}</h1>
-      {name ? <p className="text-zinc-700">{name}</p> : null}
-      {label ? <p className="text-sm text-zinc-600">{label}</p> : null}
-      <Link href="/join" className="mt-4 text-sm text-zinc-600 underline">
-        Done
-      </Link>
-    </main>
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
+      <div className="flex w-full max-w-sm flex-col gap-6">
+        <BrandLockup className="self-center" size="lg" />
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">You&apos;re checked in</CardTitle>
+            <CardDescription>
+              {name ? `${name} · ` : ""}Code {code}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 text-center">
+            {label ? (
+              <p className="text-sm text-muted-foreground">{label}</p>
+            ) : null}
+            <Button render={<Link href="/join" />} className="w-full">
+              Done
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
 
@@ -27,7 +48,7 @@ export default function JoinDonePage() {
   return (
     <Suspense
       fallback={
-        <p className="flex min-h-screen items-center justify-center text-sm text-zinc-500">
+        <p className="flex min-h-svh items-center justify-center bg-muted text-sm text-muted-foreground">
           Loading…
         </p>
       }
